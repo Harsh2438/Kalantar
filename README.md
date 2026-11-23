@@ -84,11 +84,11 @@ pip install -r requirements.txt
 
 ### 3. Launch the Application
 ```bash
-uvicorn backend.main:app --reload --port 8000
+uvicorn backend.main:app --reload --port 8050
 ```
 Open your browser to:
-* **Web Dashboard:** [http://127.0.0.1:8000](http://127.0.0.1:8000)
-* **Interactive API Swagger Docs:** [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+* **Web Dashboard:** [http://127.0.0.1:8050](http://127.0.0.1:8050)
+* **Interactive API Swagger Docs:** [http://127.0.0.1:8050/docs](http://127.0.0.1:8050/docs)
 
 ---
 
