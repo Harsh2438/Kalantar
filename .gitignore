@@ -1,0 +1,21 @@
+# Python Virtual Environment & Caches
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.ipynb_checkpoints/
+.pytest_cache/
+
+# Oversized Raw Datasets (> 100 MB rejected by GitHub)
+data/raw/ir_train.csv
+data/raw/railway_timetable/Train_details_22122017.csv
+data/raw/*.zip
+data/raw/*.tar.gz
+
+# System & IDE
+.DS_Store
+Thumbs.db
+.vscode/
+*.log

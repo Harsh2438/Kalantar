@@ -1,0 +1,11 @@
+
+KALANTAR — Experiment 001
+Target: delay_minutes
+Split: chronological by departure year
+
+Training rows: 1070215
+Validation rows: 215538
+Test rows: 214247
+
+Baseline: training-set median
+Baseline prediction: 111.0 minutes

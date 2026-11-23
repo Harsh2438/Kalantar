@@ -1,0 +1,25 @@
+KALANTAR — Experiment 003 (Final Model Evaluation & Artifact Export)
+Target: delay_minutes
+Model: XGBoost Regressor (hist)
+Training split (2018–2022): 75000 rows
+Validation split (2023):    30000 rows
+Held-out Test split (2024):  30000 rows
+
+Baseline (training median: 111.0 min):
+- Validation MAE: 52.65 min
+- Test MAE:       52.30 min
+
+XGBoost Model Performance:
+- Validation MAE:  34.65 min (34.2% relative reduction)
+- Validation RMSE: 46.91 min
+- Test MAE:        34.92 min (33.2% relative reduction)
+- Test RMSE:       47.59 min
+
+Empirical 80% Uncertainty Range:
+- Lower offset: -53.37 min
+- Upper offset: +58.84 min
+
+Artifacts Saved:
+- models/preprocessor.joblib
+- models/delay_model.joblib
+- models/metadata.json

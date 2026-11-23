@@ -1,0 +1,12 @@
+
+KALANTAR — Experiment 002
+Model: XGBoost Regressor
+Dataset: Synthetic railway delay dataset
+Training sample: 75000
+Validation sample: 30000
+
+Validation MAE: 34.65 minutes
+Validation RMSE: 46.91 minutes
+
+Sampled validation median baseline MAE:
+52.65 minutes

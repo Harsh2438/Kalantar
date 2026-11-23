@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KALANTAR — Railway Intelligence & Decision Support System</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .glass {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- Navigation / Header -->
+  <header class="border-b border-slate-800/80 bg-slate-900/60 sticky top-0 z-50 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+        </div>
+        <div>
+          <span class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+            KALANTAR <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 font-medium border border-indigo-500/30">AI 2.0</span>
+          </span>
+          <p class="text-xs text-slate-400 hidden sm:block">Explainable Railway Intelligence & Decision Support</p>
+        </div>
+      </div>
+      
+      <!-- API Health Status Badge -->
+      <div class="flex items-center space-x-3">
+        <div id="healthBadge" class="flex items-center space-x-2 text-xs font-medium px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>FastAPI Connected</span>
+        </div>
+        <a href="/docs" target="_blank" class="text-xs text-slate-400 hover:text-indigo-400 border border-slate-700/60 px-3 py-1.5 rounded-lg transition-colors hover:border-indigo-500/50">
+          API Docs &rarr;
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Tabs Navigation -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex border-b border-slate-800 space-x-2 sm:space-x-8 mb-8 overflow-x-auto pb-1">
+      <button onclick="switchTab('predictor')" id="tab-predictor" class="tab-btn pb-3 text-sm font-semibold flex items-center gap-2 border-b-2 border-indigo-500 text-indigo-400 transition-all">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        1. Delay Prediction & XAI
+      </button>
+      <button onclick="switchTab('simulator')" id="tab-simulator" class="tab-btn pb-3 text-sm font-medium flex items-center gap-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-all">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        2. Route Delay Propagation
+      </button>
+      <button onclick="switchTab('decision')" id="tab-decision" class="tab-btn pb-3 text-sm font-medium flex items-center gap-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-all">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+        3. Passenger Decision Support
+      </button>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 1: DYNAMIC ETA PREDICTION & XAI -->
+    <!-- ================================================================= -->
+    <div id="view-predictor" class="space-y-6">
+      
+      <!-- Scenario Quick Presets -->
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Quick Demo Scenarios:</span>
+        <div class="flex flex-wrap gap-2">
+          <button onclick="applyPreset('normal')" class="text-xs font-medium px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition border border-slate-700 hover:border-slate-600">
+            ☀️ Normal Conditions (Clear)
+          </button>
+          <button onclick="applyPreset('fog_late')" class="text-xs font-medium px-3 py-1.5 rounded-lg bg-indigo-950/60 hover:bg-indigo-900/60 text-indigo-300 transition border border-indigo-800/60">
+            ❄️ Winter Fog + Late Rake
+          </button>
+          <button onclick="applyPreset('monsoon')" class="text-xs font-medium px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition border border-slate-700 hover:border-slate-600">
+            🌧️ Monsoon Congestion
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Input Form (Left 7 Cols) -->
+        <div class="lg:col-span-7 glass rounded-2xl p-6 space-y-6">
+          <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
+            Operational Journey Parameters
+          </h2>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Train Service Type</label>
+              <select id="train_type" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                <option value="Superfast">Superfast Express</option>
+                <option value="Express">Mail / Express</option>
+                <option value="Rajdhani">Rajdhani Express</option>
+                <option value="Shatabdi">Shatabdi Express</option>
+                <option value="Passenger">Passenger</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Railway Zone</label>
+              <select id="zone" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                <option value="NR">NR (Northern)</option>
+                <option value="NCR">NCR (North Central)</option>
+                <option value="WR">WR (Western)</option>
+                <option value="CR">CR (Central)</option>
+                <option value="ER">ER (Eastern)</option>
+                <option value="SR">SR (Southern)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1.5">Season</label>
+              <select id="season" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                <option value="Winter">Winter (Nov–Feb)</option>
+                <option value="Summer">Summer (Mar–Jun)</option>
+                <option value="Monsoon">Monsoon (Jul–Oct)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Sliders -->
+          <div class="space-y-4 pt-2">
+            <div>
+              <div class="flex justify-between text-xs font-medium mb-1">
+                <span class="text-slate-400">Route Distance</span>
+                <span id="distance_val" class="text-indigo-400 font-semibold">850 km</span>
+              </div>
+              <input type="range" id="distance_km" min="100" max="2500" step="50" value="850" class="w-full accent-indigo-500 bg-slate-800 rounded-lg h-2 cursor-pointer" oninput="document.getElementById('distance_val').innerText = this.value + ' km'">
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs font-medium mb-1">
+                <span class="text-slate-400">Scheduled Travel Duration</span>
+                <span id="hours_val" class="text-indigo-400 font-semibold">13.0 hrs</span>
+              </div>
+              <input type="range" id="scheduled_travel_hours" min="2" max="40" step="0.5" value="13.0" class="w-full accent-indigo-500 bg-slate-800 rounded-lg h-2 cursor-pointer" oninput="document.getElementById('hours_val').innerText = this.value + ' hrs'">
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs font-medium mb-1">
+                <span class="text-slate-400">Historical Route On-Time Adherence</span>
+                <span id="ontime_val" class="text-indigo-400 font-semibold">78%</span>
+              </div>
+              <input type="range" id="route_historical_ontime_pct" min="20" max="100" step="1" value="78" class="w-full accent-indigo-500 bg-slate-800 rounded-lg h-2 cursor-pointer" oninput="document.getElementById('ontime_val').innerText = this.value + '%'">
+            </div>
+          </div>
+
+          <!-- Toggle Switches -->
+          <div class="pt-2 border-t border-slate-800 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label class="flex items-center justify-between p-3 rounded-xl bg-slate-900/80 border border-slate-800 cursor-pointer hover:border-slate-700 transition">
+              <div>
+                <span class="text-xs font-semibold text-slate-200 block">Late Incoming Rake</span>
+                <span class="text-[11px] text-slate-500 block">Turnaround rake arrived delayed</span>
+              </div>
+              <input type="checkbox" id="late_incoming_rake" class="w-5 h-5 accent-indigo-500 rounded cursor-pointer">
+            </label>
+
+            <label class="flex items-center justify-between p-3 rounded-xl bg-slate-900/80 border border-slate-800 cursor-pointer hover:border-slate-700 transition">
+              <div>
+                <span class="text-xs font-semibold text-slate-200 block">Dense Fog Risk</span>
+                <span class="text-[11px] text-slate-500 block">Restricted visibility advisory</span>
+              </div>
+              <input type="checkbox" id="is_fog_risk" class="w-5 h-5 accent-indigo-500 rounded cursor-pointer">
+            </label>
+
+            <label class="flex items-center justify-between p-3 rounded-xl bg-slate-900/80 border border-slate-800 cursor-pointer hover:border-slate-700 transition">
+              <div>
+                <span class="text-xs font-semibold text-slate-200 block">Modern LHB Coaches</span>
+                <span class="text-[11px] text-slate-500 block">Speed capability up to 130 km/h</span>
+              </div>
+              <input type="checkbox" id="has_lhb_coaches" checked class="w-5 h-5 accent-indigo-500 rounded cursor-pointer">
+            </label>
+
+            <label class="flex items-center justify-between p-3 rounded-xl bg-slate-900/80 border border-slate-800 cursor-pointer hover:border-slate-700 transition">
+              <div>
+                <span class="text-xs font-semibold text-slate-200 block">Double Track Corridor</span>
+                <span class="text-[11px] text-slate-500 block">No single-line crossing hold</span>
+              </div>
+              <input type="checkbox" id="track_doubled" checked class="w-5 h-5 accent-indigo-500 rounded cursor-pointer">
+            </label>
+          </div>
+
+          <button onclick="runDelayPrediction()" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold text-sm shadow-lg shadow-indigo-500/25 transition-all flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            Compute Dynamic ETA Prediction
+          </button>
+        </div>
+
+        <!-- Prediction Output Display (Right 5 Cols) -->
+        <div class="lg:col-span-5 space-y-6">
+          
+          <!-- Primary Prediction Card -->
+          <div class="glass rounded-2xl p-6 text-center space-y-4 border border-indigo-500/20 relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-indigo-500/10 rounded-full blur-2xl"></div>
+
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Estimated Arrival Delay</span>
+            
+            <div class="py-2">
+              <span id="res_delay" class="text-5xl sm:text-6xl font-extrabold text-white tracking-tight">--</span>
+              <span class="text-slate-400 text-lg font-medium ml-1">min</span>
+            </div>
+
+            <!-- Status Pill -->
+            <div>
+              <span id="res_badge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-slate-800 text-slate-400 border border-slate-700">
+                Awaiting calculation...
+              </span>
+            </div>
+
+            <!-- 80% Uncertainty Range Box -->
+            <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 text-left space-y-1">
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-slate-400 font-medium">80% Probabilistic Range:</span>
+                <span id="res_range" class="text-indigo-400 font-bold">-- to -- min</span>
+              </div>
+              <p class="text-[11px] text-slate-500">Distribution-free empirical quantile intervals calibrated against 2024 test data.</p>
+            </div>
+          </div>
+
+          <!-- Feature Explanation / XAI Breakdown -->
+          <div class="glass rounded-2xl p-6 space-y-4">
+            <h3 class="text-sm font-semibold text-white flex items-center gap-2">
+              <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              Key Contributing Delay Factors (TreeSHAP)
+            </h3>
+            <div id="res_factors" class="space-y-2 text-xs">
+              <p class="text-slate-500 italic">Run prediction to view feature importance attributions.</p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 2: ROUTE DELAY PROPAGATION SIMULATOR -->
+    <!-- ================================================================= -->
+    <div id="view-simulator" class="hidden space-y-6">
+      <div class="glass rounded-2xl p-6 space-y-4">
+        <h2 class="text-lg font-semibold text-white">Network Route Delay Propagation</h2>
+        <p class="text-xs text-slate-400">Simulate how delay spreads through stations across the 186,000-record Indian Railways timetable network, accounting for buffer recovery.</p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1">Select Train Service</label>
+            <select id="sim_train" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+              <option value="12626">12626 — Kerala Express (NDLS -> TVC)</option>
+              <option value="12951">12951 — Mumbai Rajdhani (BCT -> NDLS)</option>
+              <option value="12301">12301 — Howrah Rajdhani (HWH -> NDLS)</option>
+              <option value="12183">12183 — Bhopal Express (BPL -> PBH)</option>
+              <option value="11078">11078 — Jhelum Express (JAT -> PUNE)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1">Initial Departure Delay (min)</label>
+            <input type="number" id="sim_initial_delay" value="75" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+          </div>
+          <div class="flex items-end">
+            <button onclick="runRouteSimulation()" class="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition">
+              Simulate Stop-by-Stop Propagation
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Station Table Result -->
+      <div class="glass rounded-2xl p-6 space-y-4">
+        <h3 class="text-sm font-semibold text-white flex items-center justify-between">
+          <span>Station Cascade Timeline</span>
+          <span id="sim_stop_count" class="text-xs text-slate-400 font-normal">--</span>
+        </h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="border-b border-slate-800 text-slate-400 uppercase tracking-wider">
+                <th class="py-3 px-3">#</th>
+                <th class="py-3 px-3">Station Code</th>
+                <th class="py-3 px-3">Station Name</th>
+                <th class="py-3 px-3">Scheduled Arrival</th>
+                <th class="py-3 px-3">Scheduled Departure</th>
+                <th class="py-3 px-3 text-indigo-400 font-bold">Simulated Delay</th>
+                <th class="py-3 px-3 text-emerald-400 font-bold">Estimated Actual Arrival</th>
+              </tr>
+            </thead>
+            <tbody id="sim_tbody" class="divide-y divide-slate-800/60 text-slate-300">
+              <tr>
+                <td colspan="7" class="py-6 text-center text-slate-500 italic">Click "Simulate Stop-by-Stop Propagation" to view route dynamics.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 3: PASSENGER DECISION SUPPORT & ALTERNATIVES -->
+    <!-- ================================================================= -->
+    <div id="view-decision" class="hidden space-y-6">
+      
+      <div class="glass rounded-2xl p-6 space-y-4">
+        <h2 class="text-lg font-semibold text-white">Passenger Connection Risk & Alternative Routing</h2>
+        <p class="text-xs text-slate-400">Evaluate whether a passenger transferring at a junction station will safely catch their connecting train under stochastic delay conditions.</p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 pt-2">
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1">Inbound Train</label>
+            <input type="text" id="conn_inbound" value="12626" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1">Transfer Junction</label>
+            <select id="conn_station" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200">
+              <option value="BPL">Bhopal Junction (BPL)</option>
+              <option value="NDLS">New Delhi (NDLS)</option>
+              <option value="CNB">Kanpur Central (CNB)</option>
+              <option value="JHS">Jhansi Junction (JHS)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1">Connecting Outbound Train</label>
+            <input type="text" id="conn_outbound" value="11078" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1">Inbound Delay (min)</label>
+            <input type="number" id="conn_delay" value="75" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200">
+          </div>
+        </div>
+
+        <button onclick="runConnectionAssessment()" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-sm transition mt-2">
+          Analyze Transfer Feasibility & Alternatives
+        </button>
+      </div>
+
+      <!-- Connection Risk Results Card -->
+      <div id="conn_result_card" class="hidden glass rounded-2xl p-6 space-y-6">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-800 gap-4">
+          <div>
+            <span class="text-xs text-slate-400 uppercase tracking-wider block">Transfer Evaluation</span>
+            <h3 id="risk_train_summary" class="text-base font-bold text-white">Inbound vs Outbound</h3>
+          </div>
+          <div id="risk_badge" class="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
+            Safe
+          </div>
+        </div>
+
+        <!-- Buffer Metrics -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+          <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+            <span class="text-[11px] text-slate-400 block">Scheduled Buffer</span>
+            <span id="risk_sched_buf" class="text-xl font-bold text-slate-200">-- min</span>
+          </div>
+          <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+            <span class="text-[11px] text-slate-400 block">Incoming Delay</span>
+            <span id="risk_inc_delay" class="text-xl font-bold text-amber-400">-- min</span>
+          </div>
+          <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+            <span class="text-[11px] text-slate-400 block">Effective Transfer Buffer</span>
+            <span id="risk_eff_buf" class="text-xl font-bold text-white">-- min</span>
+          </div>
+          <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800">
+            <span class="text-[11px] text-slate-400 block">Estimated Arrival</span>
+            <span id="risk_est_arr" class="text-xl font-bold text-indigo-400">--:--</span>
+          </div>
+        </div>
+
+        <!-- Advice Banner -->
+        <div id="risk_advice_box" class="p-4 rounded-xl border text-xs font-medium"></div>
+
+        <!-- Alternative Trains Section -->
+        <div id="alts_section" class="space-y-3 pt-2">
+          <h4 class="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+            System Recommended Alternative Trains (Automated Decision Support)
+          </h4>
+          <div id="alts_container" class="grid grid-cols-1 sm:grid-cols-3 gap-4"></div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-900 py-6 text-center text-xs text-slate-600">
+    KALANTAR: Explainable & Probabilistic AI Railway Intelligence System • Capstone Project
+  </footer>
+
+  <!-- Frontend Logic -->
+  <script>
+    function switchTab(tabId) {
+      ['predictor', 'simulator', 'decision'].forEach(id => {
+        document.getElementById(`view-${id}`).classList.add('hidden');
+        const btn = document.getElementById(`tab-${id}`);
+        btn.classList.remove('border-indigo-500', 'text-indigo-400');
+        btn.classList.add('border-transparent', 'text-slate-400');
+      });
+      document.getElementById(`view-${tabId}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tab-${tabId}`);
+      activeBtn.classList.remove('border-transparent', 'text-slate-400');
+      activeBtn.classList.add('border-indigo-500', 'text-indigo-400');
+    }
+
+    function applyPreset(type) {
+      if (type === 'normal') {
+        document.getElementById('train_type').value = 'Superfast';
+        document.getElementById('season').value = 'Summer';
+        document.getElementById('zone').value = 'NR';
+        document.getElementById('distance_km').value = 750;
+        document.getElementById('distance_val').innerText = '750 km';
+        document.getElementById('scheduled_travel_hours').value = 11.5;
+        document.getElementById('hours_val').innerText = '11.5 hrs';
+        document.getElementById('route_historical_ontime_pct').value = 85;
+        document.getElementById('ontime_val').innerText = '85%';
+        document.getElementById('late_incoming_rake').checked = false;
+        document.getElementById('is_fog_risk').checked = false;
+      } else if (type === 'fog_late') {
+        document.getElementById('train_type').value = 'Express';
+        document.getElementById('season').value = 'Winter';
+        document.getElementById('zone').value = 'NCR';
+        document.getElementById('distance_km').value = 1100;
+        document.getElementById('distance_val').innerText = '1100 km';
+        document.getElementById('scheduled_travel_hours').value = 19.0;
+        document.getElementById('hours_val').innerText = '19.0 hrs';
+        document.getElementById('route_historical_ontime_pct').value = 45;
+        document.getElementById('ontime_val').innerText = '45%';
+        document.getElementById('late_incoming_rake').checked = true;
+        document.getElementById('is_fog_risk').checked = true;
+      } else if (type === 'monsoon') {
+        document.getElementById('train_type').value = 'Superfast';
+        document.getElementById('season').value = 'Monsoon';
+        document.getElementById('zone').value = 'WR';
+        document.getElementById('distance_km').value = 950;
+        document.getElementById('distance_val').innerText = '950 km';
+        document.getElementById('scheduled_travel_hours').value = 15.0;
+        document.getElementById('hours_val').innerText = '15.0 hrs';
+        document.getElementById('route_historical_ontime_pct').value = 65;
+        document.getElementById('ontime_val').innerText = '65%';
+        document.getElementById('late_incoming_rake').checked = false;
+        document.getElementById('is_fog_risk').checked = false;
+      }
+      runDelayPrediction();
+    }
+
+    async function runDelayPrediction() {
+      const payload = {
+        train_type: document.getElementById('train_type').value,
+        year: 2024,
+        month: document.getElementById('season').value === 'Winter' ? 12 : (document.getElementById('season').value === 'Summer' ? 5 : 8),
+        day_of_week: 3,
+        departure_hour: 14,
+        is_weekend: 0,
+        is_night_departure: 0,
+        is_peak_hour: 1,
+        is_festival_season: 0,
+        season: document.getElementById('season').value,
+        zone: document.getElementById('zone').value,
+        source_station_category: 'A1',
+        destination_station_category: 'A1',
+        distance_km: parseFloat(document.getElementById('distance_km').value),
+        num_scheduled_stops: 14,
+        scheduled_travel_hours: parseFloat(document.getElementById('scheduled_travel_hours').value),
+        track_doubled: document.getElementById('track_doubled').checked ? 1 : 0,
+        is_hdn_route: 1,
+        traction_type: 'Electric',
+        is_electrified: 1,
+        psr_count: 4,
+        is_circular_route: 0,
+        is_monsoon_season: document.getElementById('season').value === 'Monsoon' ? 1 : 0,
+        is_fog_risk: document.getElementById('is_fog_risk').checked ? 1 : 0,
+        fog_risk_score: document.getElementById('is_fog_risk').checked ? 0.85 : 0.0,
+        zone_fog_index: document.getElementById('is_fog_risk').checked ? 0.80 : 0.0,
+        zone_congestion_index: 0.50,
+        season_severity_score: document.getElementById('season').value === 'Winter' ? 0.75 : 0.20,
+        loco_age_years: 5,
+        coach_age_years: 4,
+        has_lhb_coaches: document.getElementById('has_lhb_coaches').checked ? 1 : 0,
+        is_rake_shared: 0,
+        maintenance_score: 85.0,
+        seat_utilisation_pct: 85.0,
+        is_overloaded: 0,
+        late_incoming_rake: document.getElementById('late_incoming_rake').checked ? 1 : 0,
+        is_special_train: 0,
+        route_historical_ontime_pct: parseFloat(document.getElementById('route_historical_ontime_pct').value)
+      };
+
+      try {
+        const res = await fetch('/api/predict-delay', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        // Update Display
+        const delay = data.predicted_delay_min;
+        document.getElementById('res_delay').innerText = delay > 0 ? `+${delay}` : `${delay}`;
+        document.getElementById('res_range').innerText = `[${data.uncertainty_range.lower_min} min to ${data.uncertainty_range.upper_min} min]`;
+
+        const badge = document.getElementById('res_badge');
+        badge.innerText = data.status_category;
+        if (data.status_color === 'green') {
+          badge.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+        } else if (data.status_color === 'amber') {
+          badge.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-amber-500/20 text-amber-400 border border-amber-500/30';
+        } else {
+          badge.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-rose-500/20 text-rose-400 border border-rose-500/30';
+        }
+
+        // Update Factors
+        const factorsContainer = document.getElementById('res_factors');
+        factorsContainer.innerHTML = '';
+        data.key_factors.forEach(f => {
+          const item = document.createElement('div');
+          item.className = 'p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between';
+          item.innerHTML = `
+            <span class="font-medium text-slate-200">${f.factor}</span>
+            <span class="text-[11px] px-2 py-0.5 rounded font-mono ${f.level === 'critical' ? 'bg-rose-500/20 text-rose-300' : (f.level === 'warning' ? 'bg-amber-500/20 text-amber-300' : 'bg-emerald-500/20 text-emerald-300')}">${f.impact}</span>
+          `;
+          factorsContainer.appendChild(item);
+        });
+
+        // Sync delay to tab 2 and 3 inputs
+        document.getElementById('sim_initial_delay').value = Math.max(0, delay);
+        document.getElementById('conn_delay').value = Math.max(0, delay);
+
+      } catch (err) {
+        console.error(err);
+        alert('Failed to connect to backend prediction API.');
+      }
+    }
+
+    async function runRouteSimulation() {
+      const train_no = document.getElementById('sim_train').value;
+      const initial_delay = parseFloat(document.getElementById('sim_initial_delay').value);
+
+      try {
+        const res = await fetch('/api/simulate-route', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({train_no, initial_delay_minutes: initial_delay})
+        });
+        const data = await res.json();
+
+        document.getElementById('sim_stop_count').innerText = `${data.total_stops} Scheduled Stations`;
+        const tbody = document.getElementById('sim_tbody');
+        tbody.innerHTML = '';
+
+        data.stops.forEach(s => {
+          const row = document.createElement('tr');
+          row.className = 'hover:bg-slate-800/40 transition-colors';
+          row.innerHTML = `
+            <td class="py-2.5 px-3 text-slate-500 font-mono">${s.SEQ}</td>
+            <td class="py-2.5 px-3 font-semibold text-slate-200">${s['Station Code']}</td>
+            <td class="py-2.5 px-3 text-slate-300">${s['Station Name']}</td>
+            <td class="py-2.5 px-3 text-slate-400 font-mono">${s['Scheduled Arrival']}</td>
+            <td class="py-2.5 px-3 text-slate-400 font-mono">${s['Scheduled Departure']}</td>
+            <td class="py-2.5 px-3 text-indigo-400 font-semibold font-mono">+${s['Simulated Delay (min)']}m</td>
+            <td class="py-2.5 px-3 text-emerald-400 font-bold font-mono">${s['Estimated Actual Arrival']}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      } catch (err) {
+        console.error(err);
+        alert('Route simulation failed. Please ensure train number exists in timetable.');
+      }
+    }
+
+    async function runConnectionAssessment() {
+      const inbound_train_no = document.getElementById('conn_inbound').value;
+      const outbound_train_no = document.getElementById('conn_outbound').value;
+      const transfer_station_code = document.getElementById('conn_station').value;
+      const inbound_predicted_delay = parseFloat(document.getElementById('conn_delay').value);
+
+      try {
+        const res = await fetch('/api/evaluate-connection', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            inbound_train_no,
+            outbound_train_no,
+            transfer_station_code,
+            inbound_predicted_delay
+          })
+        });
+        const data = await res.json();
+        const r = data.risk_report;
+
+        document.getElementById('conn_result_card').classList.remove('hidden');
+        document.getElementById('risk_train_summary').innerText = `${r.inbound_train} ➔ ${r.outbound_train} at ${r.transfer_station}`;
+        document.getElementById('risk_sched_buf').innerText = `${r.scheduled_buffer_min} min`;
+        document.getElementById('risk_inc_delay').innerText = `+${r.predicted_delay_min} min`;
+        document.getElementById('risk_eff_buf').innerText = `${r.effective_buffer_min} min`;
+        document.getElementById('risk_est_arr').innerText = r.estimated_arrival;
+
+        // Badge & Advice box
+        const badge = document.getElementById('risk_badge');
+        const adviceBox = document.getElementById('risk_advice_box');
+        badge.innerText = r.risk_level;
+
+        if (r.risk_level.includes('SAFE')) {
+          badge.className = 'px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+          adviceBox.className = 'p-4 rounded-xl border text-xs font-medium bg-emerald-500/10 border-emerald-500/20 text-emerald-300';
+        } else if (r.risk_level.includes('TIGHT')) {
+          badge.className = 'px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/20 text-amber-400 border border-amber-500/30';
+          adviceBox.className = 'p-4 rounded-xl border text-xs font-medium bg-amber-500/10 border-amber-500/20 text-amber-300';
+        } else {
+          badge.className = 'px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-500/20 text-rose-400 border border-rose-500/30';
+          adviceBox.className = 'p-4 rounded-xl border text-xs font-medium bg-rose-500/10 border-rose-500/20 text-rose-300';
+        }
+        adviceBox.innerText = `Recommendation: ${r.advice}`;
+
+        // Alternatives
+        const altsContainer = document.getElementById('alts_container');
+        altsContainer.innerHTML = '';
+        if (data.alternatives && data.alternatives.length > 0) {
+          document.getElementById('alts_section').classList.remove('hidden');
+          data.alternatives.forEach(alt => {
+            const card = document.createElement('div');
+            card.className = 'p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5';
+            card.innerHTML = `
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-indigo-400 font-mono">${alt['Train No']}</span>
+                <span class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">Wait ~${alt['Wait Time (hrs)']}h</span>
+              </div>
+              <h5 class="text-xs font-semibold text-white truncate">${alt['Train Name']}</h5>
+              <div class="flex justify-between text-[11px] text-slate-400 pt-1">
+                <span>Departs: <b class="text-slate-200">${alt['Departure Time']}</b></span>
+                <span>To: <b class="text-slate-200">${alt['Destination']}</b></span>
+              </div>
+            `;
+            altsContainer.appendChild(card);
+          });
+        } else {
+          altsContainer.innerHTML = '<p class="text-xs text-slate-500 italic col-span-3">No direct later alternatives found within 12 hours.</p>';
+        }
+
+      } catch (err) {
+        console.error(err);
+        alert('Connection assessment failed: ' + err.message);
+      }
+    }
+
+    // Auto-run on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      runDelayPrediction();
+    });
+  </script>
+</body>
+</html>
