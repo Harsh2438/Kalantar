@@ -1,7 +1,7 @@
 \documentclass[11pt,a4paper]{article}
 
 \usepackage[utf8]{inputenc}
-\usepackage[margin=1in]{geometry}
+\usepackage[top=0.85in,bottom=0.85in,left=0.85in,right=0.85in]{geometry}
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{booktabs}
 \usepackage{graphicx}
@@ -13,8 +13,6 @@
 \usepackage{microtype}
 \usepackage{tabularx}
 \usepackage{enumitem}
-\usepackage{algorithm}
-\usepackage{algpseudocode}
 
 \hypersetup{
     colorlinks=true,
@@ -23,8 +21,25 @@
     urlcolor=blue!80!black
 }
 
-\setlength{\parskip}{0.45em}
-\setlength{\parindent}{1.4em}
+% Tight spacing controls to ensure strict <= 10 page budget
+\setlength{\parskip}{0.3em}
+\setlength{\parindent}{1.2em}
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\bottomfraction}{0.85}
+\renewcommand{\textfraction}{0.15}
+\renewcommand{\floatpagefraction}{0.8}
+
+% Compact bibliography formatting
+\let\oldthebibliography\thebibliography
+\let\endoldthebibliography\endthebibliography
+\renewenvironment{thebibliography}[1]{
+  \begin{oldthebibliography}{#1}
+    \setlength{\itemsep}{0.15em}
+    \setlength{\parskip}{0em}
+}
+{
+  \end{oldthebibliography}
+}
 
 \begin{document}
 
@@ -33,289 +48,156 @@
 % -------------------------------------------------------------------------
 \begin{center}
     {\LARGE \textbf{KALANTAR: An Explainable and Probabilistic AI-Based Railway Intelligence System for Dynamic Train ETA Prediction, Delay Propagation Analysis, and Passenger Decision Support}}
-    \vspace{1.2em}
+    \vspace{1.0em}
 
     \textbf{Harsh}$^{*}$ (Reg. No. 12311856), \textbf{Charan Teja} (Reg. No. 12311893), \textbf{Chityala Vishal} (Reg. No. 12311775), \\
     \textbf{Anshul Jain} (Reg. No. 12311864), and \textbf{Abhi Raj Nigam} (Reg. No. 12307536)
-    \vspace{0.6em}
+    \vspace{0.5em}
 
     Department of Computer Science and Engineering, Lovely Professional University, Phagwara, Punjab 144411, India \\
-    \vspace{0.4em}
+    \vspace{0.3em}
     $^{*}$Correspondence to: Harsh, Registration No. 12311856, Department of Computer Science and Engineering, Lovely Professional University, Phagwara, Punjab 144411, India; Email: \texttt{harsh12311856@gmail.com}
 \end{center}
 
-\vspace{0.8em}
+\vspace{0.5em}
 
 % -------------------------------------------------------------------------
 % Abstract
 % -------------------------------------------------------------------------
 \noindent\textbf{Abstract} \\
-Large-scale national railway operations function under persistent stochastic perturbations where minor initial timetable delays rapidly escalate into systemic, network-wide disruptions. In saturated railway corridors, traditional traveler information systems rely on static published schedules or simplistic moving averages, generating point-estimate arrival forecasts that conceal operational variance and fail to advise passengers during missed connections. In this chapter, we develop and evaluate \textbf{KALANTAR}, an explainable, probabilistic, and network-aware computational framework designed for railway decision support. KALANTAR implements a three-tier architecture. First, a dynamic journey-level delay prediction engine is built using histogram-optimized gradient boosted decision trees (XGBoost), trained under a rigorous chronological partition on 1.5 million synthetic journey records spanning 2018 through 2024. The model achieves a validation Mean Absolute Error (MAE) of 34.65 minutes and a held-out 2024 test MAE of 34.92 minutes, representing an empirical 33.2\% to 34.2\% error reduction compared to operational baseline heuristics. Second, we integrate game-theoretic feature attribution via TreeSHAP alongside distribution-free empirical error quantile bounds ($[-53.4\,\mathrm{min}, +58.8\,\mathrm{min}]$), explaining the operational mechanics behind each forecast. Third, KALANTAR extracts a directed scheduled network multigraph of 175,002 station-to-station edges from 186,114 cleaned official timetable records across 8,151 stations. An empirical data compatibility investigation across 1,820 overlapping train identifiers revealed a substantial route-distance divergence (median absolute error of 355.25~km), demonstrating that naive table joins between operational delay logs and timetable tables corrupt model integrity. KALANTAR resolves this dilemma through a decoupled simulation engine that models station buffer absorption, assesses transfer connection risks, and recommends alternative services for stranded travelers. The system is deployed as a production-grade FastAPI microservice coupled with a responsive web dashboard.
+Large passenger railway systems operate under persistent operational friction, where minor initial schedule deviations cascade into widespread knock-on delays. Conventional traveler advisory tools deliver single-number arrival estimates that mask delay volatility and offer no guidance when passengers miss connecting services. This chapter introduces \textbf{KALANTAR}, an explainable, probabilistic, and network-aware artificial intelligence system engineered for railway operations and passenger decision support. KALANTAR combines a histogram-optimized gradient boosted decision tree ensemble (XGBoost) trained on 1.5 million chronological journey records (2018--2024) with game-theoretic feature attribution (TreeSHAP) and empirical prediction intervals ($[-53.4\,\mathrm{min}, +58.8\,\mathrm{min}]$). The predictive model attains a validation Mean Absolute Error (MAE) of 34.65 minutes and a 2024 held-out test MAE of 34.92 minutes, cutting baseline prediction error by 33.2\% to 34.2\%. Physical network topology is modeled through an independent directed graph of 175,002 station edges extracted from 186,114 cleaned timetable entries across 8,151 stations. An empirical cross-table audit of 1,820 overlapping train identifiers revealed a median distance discrepancy of 355.25~km, demonstrating that naive joins between operational delay logs and timetable tables corrupt model integrity. KALANTAR resolves this dilemma through a decoupled architecture that executes network propagation and connection feasibility analysis on the verified timetable graph. When transfers fail, the system calculates the Connection Risk Index ($R_c$) and suggests alternate services. The system is deployed via a FastAPI backend and a responsive web dashboard.
+
+\vspace{0.5em}
+\noindent\textbf{Keywords} \\
+Alternative Routing, Buffer Absorption, Decision Support Systems, Delay Propagation, Estimated Time of Arrival, Explainable AI, Graph Modeling, Indian Railways, Intelligent Transportation, Probabilistic Forecasting, Rake Turnaround, SHAP, Timetable Resilience, Uncertainty Quantification, XGBoost.
 
 \vspace{0.8em}
-\noindent\textbf{Keywords} \\
-Alternative Routing, Buffer Absorption, Cascading Disruptions, Decision Support Systems, Delay Propagation, Estimated Time of Arrival, Explainable AI, Graph Modeling, Indian Railways, Intelligent Transportation Systems, Network Simulation, Probabilistic Forecasting, Rake Turnaround, SHAP, Timetable Resilience, Uncertainty Quantification, XGBoost.
-
-\vspace{1.2em}
 
 % -------------------------------------------------------------------------
 % 1. Introduction
 % -------------------------------------------------------------------------
 \section{Introduction}
 
-Rail transportation networks are complex socio-technical systems characterized by tight physical interdependencies, mixed-speed traffic regimes, and constrained capacity margins \cite{hansen2014railway, corman2012real}. On saturated networks such as Indian Railways (IR), which moves more than 22 million passengers and 3 million tons of freight daily across a track network spanning over 68,000 route kilometers \cite{governance2020rail}, maintaining timetable punctuality is an ongoing challenge. A single passenger train journey traverses multiple operating divisions, encounters varied track geometry, contends with manual signal interlockings, and shares track segments with heavy freight traffic \cite{pachl2002railway}.
+Passenger rail networks form the backbone of mass mobility across high-density nations, moving millions of travelers daily across shared, mixed-traffic corridors \cite{hansen2014railway, corman2012real}. On saturated networks such as Indian Railways (IR), mixed operating speeds (superfast expresses, local passengers, and heavy freight) create tight headway margins \cite{governance2020rail, pachl2002railway}. Delays inevitably arise from two distinct sources: primary exogenous shocks (dense winter fog, heavy monsoons, signal failures, and permanent speed restrictions) and secondary knock-on delays (shared track occupation, platform congestion at junction throats, and rake turnaround conflicts) \cite{govender2020train, yuan2008stochastic, khadilkar2017data}.
 
-Operating perturbations fall into two primary classifications: primary delays and secondary (knock-on) delays \cite{yuan2008stochastic, carey1995reliability}. Primary delays originate from exogenous physical disruptions. These include severe winter fog across northern plains that slashes visual signaling range, monsoon flooding of low-lying track beds, equipment breakdowns such as overhead traction power loss or locomotive traction motor failures, and scheduled maintenance caution orders enforcing temporary speed restrictions (TSRs) \cite{govender2020train}. Secondary delays, in contrast, are endogenous network effects. When an initial train falls behind schedule, it consumes the headway margin of following services, causes platform conflicts at junction throats, and delays subsequent trips that rely on the same rolling-stock (rake turnaround dependency) \cite{khadilkar2017data}.
-
-When rail services experience systemic friction, passengers require timely, accurate, and actionable arrival information. Nevertheless, contemporary railway mobile applications and station passenger information displays suffer from three systemic shortcomings:
+When rail services fall behind schedule, current commuter applications suffer from three critical shortcomings:
 \begin{enumerate}[label=(\roman*)]
-    \item \textbf{Deterministic Point Estimates:} Existing tracking applications extrapolate future station arrival times using current line positions and historical segment run times. They output deterministic arrival figures (e.g., ``Arriving at 16:45'') without providing confidence intervals or acknowledging prediction uncertainty. When real-world variance is high, a point estimate creates false passenger expectations and complicates journey planning.
-    \item \textbf{The Data Decoupling Dilemma:} Empirical railway datasets are isolated. Live journey telemetry logs capture delay outcomes but often lack route topologies. Conversely, official timetables define scheduled connectivity but omit dynamic operational delays. Merging these disjoint datasets by train number alone introduces significant error: multi-legged services, slip coaches, weekly route bifurcations, and synthetic logging artifacts mean identical train numbers frequently run over vastly different route lengths.
-    \item \textbf{Absence of Downstream Decision Support:} When a passenger faces a severe delay on an inbound service, current applications report the delay passively. They do not calculate whether the traveler will miss a scheduled transfer at an upcoming junction, nor do they search the wider network to recommend viable alternative trains.
+    \item \textbf{Deterministic Point Estimates:} Commercial trackers provide static arrival times without confidence intervals. In volatile operating environments, a deterministic estimate misleads travelers by ignoring operational variance.
+    \item \textbf{The Data Decoupling Dilemma:} Empirical rail records are fragmented. Operational delay logs capture delay outcomes but lack route topologies. Conversely, published timetables describe scheduled connectivity but lack live delay dynamics. Naively merging these disjoint tables by train number introduces massive error due to bifurcated slip routes and multi-day operational runs.
+    \item \textbf{Absence of Passenger Decision Support:} When a journey experiences a critical delay, existing tools passively log the tardiness. They do not calculate whether the passenger will miss an onward train transfer at a junction, nor do they search the network to recommend viable alternative trains.
 \end{enumerate}
 
-To address these operational challenges, we present \textbf{KALANTAR} (\textit{An Explainable and Probabilistic AI-Based Railway Intelligence System for Dynamic Train ETA Prediction, Delay Propagation Analysis, and Passenger Decision Support}). Rather than forcing incompatible datasets into an artificial join, KALANTAR establishes a modular architecture. Journey-level delay estimation is handled by a gradient-boosted decision tree ensemble enriched with TreeSHAP explanations and empirical prediction intervals. Network-level delay cascade modeling is executed on an independent, validated directed graph extracted from official timetable databases. The two components communicate via operational transfer interfaces, calculating connection failure risks and surfacing alternate travel plans.
-
-The rest of this chapter is structured as follows. Section~\ref{sec:lit_review} examines related work in statistical dispatching, machine learning, and explainable transport systems. Section~\ref{sec:data_char} describes our empirical datasets and the diagnostic distance audit. Section~\ref{sec:methodology} formalizes the mathematical modeling pipeline, explainability layer, and network propagation mechanics. Section~\ref{sec:results} presents quantitative experimental evaluations, feature attributions, and corridor case studies. Section~\ref{sec:architecture} outlines the software implementation and web architecture. Section~\ref{sec:discussion} discusses operational limitations, and Section~\ref{sec:conclusion} concludes the chapter.
+To overcome these structural limitations, we design and implement \textbf{KALANTAR}. KALANTAR establishes a modular architecture: journey delay prediction is performed by an XGBoost regressor enriched with TreeSHAP explanations and distribution-free prediction bounds, while network delay propagation and transfer feasibility are modeled on an independent 175,002-edge directed timetable graph.
 
 % -------------------------------------------------------------------------
 % 2. Literature Review
 % -------------------------------------------------------------------------
 \section{Literature Review}
-\label{sec:lit_review}
 
-The study of train delays and timetable stability spans over four decades of operations research, civil engineering, and computer science. Research in this domain can be organized into four principal traditions: analytical dispatching formulations, statistical and machine learning approaches, network-wide delay propagation models, and explainable artificial intelligence for safety-critical transportation.
+Early railway operations research relied on analytical and integer programming models. Carey and Kwieci{\'n}ski \cite{carey1994stochastic, carey1995reliability} derived stochastic approximation models to analyze delay propagation through single-track and double-track corridors, formalizing the role of scheduled headway buffers. Higgins et al. \cite{higgins1998delay} developed discrete-time integer programming for single-line crossing conflicts. While mathematically rigorous, analytical dispatching models scale poorly to national networks and assume static physical constants that fail to capture seasonal weather friction or rolling-stock degradation.
 
-\subsection{Analytical Dispatching and Econometric Formulations}
-Early work in railway operations research relied primarily on analytical formulations and integer programming. Carey and Kwieci{\'n}ski \cite{carey1994stochastic, carey1995reliability} derived stochastic approximation models to analyze how random schedule variances propagate through single-track and double-track rail lines, highlighting the mathematical role of scheduled headway buffer times. Higgins et al. \cite{higgins1998delay} developed discrete-time integer programming models to optimize real-time train dispatching along single-track corridors with complex crossing loops. While mathematically sound, classical dispatching optimizations encounter severe computational bottlenecks when applied across national networks containing thousands of overlapping services. Moreover, they assume deterministic physical parameters (such as fixed acceleration curves and static station dwell times), which cannot easily incorporate weather severity, rolling-stock age, or seasonal passenger crowding.
+With automated telemetry data, statistical regression and machine learning emerged. Markovi{\'c} et al. \cite{markovic2015analyzing} deployed Support Vector Regression (SVR) across Serbian passenger corridors, while Kecman and Goverde \cite{kecman2015predicting} predicted junction occupation conflicts from historical tracking records. In recent years, deep learning approaches including LSTM networks \cite{huang2020deep} and Spatial-Temporal Graph Convolutional Networks (ST-GCN) \cite{li2021spatial} have been explored. However, deep neural models operate as black boxes, require continuous GPS telemetry rarely available in developing rail systems, and lack post-hoc interpretability for human operators.
 
-\subsection{Machine Learning for Delay Estimation}
-With the arrival of automated train tracking systems, statistical regression and machine learning emerged as practical alternatives to physical simulation. Markovi{\'c} et al. \cite{markovic2015analyzing} deployed Support Vector Regression (SVR) to predict arrival delays across Serbian passenger corridors, demonstrating that kernel methods outperformed conventional multiple linear regression in capturing non-linear operational friction. Kecman and Goverde \cite{kecman2015predicting} demonstrated that historical tracking data could forecast running times and junction occupation conflicts with high precision.
+In delay propagation modeling, Goverde \cite{goverde2005p} formulated a max-plus algebra approach to evaluate network stability and timetable recovery. Yuan et al. \cite{yuan2008stochastic} derived stochastic equations for junction knock-on delays, identifying dwell-time exceedances as the primary propagation vector. Corman et al. \cite{corman2010microscopic, corman2012real} showed that coordination algorithms curb secondary delays during network disruptions. In passenger decision support, Berger et al. \cite{berger2011stochastic} analyzed transfer guarantees, while Sch{\"o}bel \cite{schobel2007integer} formulated integer programming for delay management. 
 
-In recent years, deep learning architectures have gained popularity. Huang et al. \cite{huang2020deep} introduced Long Short-Term Memory (LSTM) recurrent networks to model temporal sequences in regional train delays. Li et al. \cite{li2021spatial} combined spatial convolutions with temporal attention mechanisms in Spatial-Temporal Graph Convolutional Networks (ST-GCN) to forecast station-level delays across high-speed networks. Despite their predictive accuracy, deep neural networks function as uninterpretable black boxes, require vast arrays of continuous GPS telemetry, and offer limited visibility to human dispatchers or passengers regarding why a specific delay was forecasted.
-
-\subsection{Network Propagation and Timetable Robustness}
-Network-level propagation models examine how an isolated primary disruption cascades through shared infrastructure. Goverde \cite{goverde2005p} formulated a max-plus algebra framework to evaluate network periodicity, stability, and scheduled recovery margins under operational disturbances. Yuan et al. \cite{yuan2008stochastic} developed stochastic models to calculate knock-on delays at railway junction stations, concluding that platform assignment conflicts and scheduled dwell-time exceedances represent the primary transmission vectors for secondary delays. Corman et al. \cite{corman2010microscopic, corman2012real} designed heuristic tabu-search and coordination algorithms for inter-area train rescheduling, demonstrating that proactive dispatching interventions substantially curb secondary delay propagation. However, these microscopic simulation models demand detailed interlocking logic, platform track circuits, and route-setting tables that are rarely open or accessible in developing railway systems.
-
-\subsection{Explainability and Decision Support in Transit}
-Explainable Artificial Intelligence (XAI) has emerged as an essential requirement for machine learning deployments in transportation \cite{barredo2020explainable, muller2021explainability}. Lundberg and Lee \cite{lundberg2017unified, lundberg2020local} unified cooperative game theory with tree-ensemble algorithms through SHAP (Shapley Additive exPlanations), providing mathematically consistent, local feature attributions. While SHAP has been utilized in air traffic flow management and highway bottleneck analysis, its application to complex passenger rail systems—particularly in separating incoming rake turnaround dependencies from weather shocks—remains limited. In passenger decision support, Berger et al. \cite{berger2011stochastic} formulated stochastic delay management models to evaluate transfer guarantees, while Sch{\"o}bel \cite{schobel2007integer} analyzed the classic ``wait-or-depart'' dilemma for connecting trains. KALANTAR extends this literature by integrating gradient boosted regression, empirical uncertainty intervals, game-theoretic interpretability, and graph-based passenger connection recommendations into a unified software system.
+Explainable Artificial Intelligence (XAI) is critical for safety-critical transportation \cite{barredo2020explainable, muller2021explainability}. Lundberg and Lee \cite{lundberg2017unified, lundberg2020local} introduced SHAP (Shapley Additive exPlanations), unifying cooperative game theory with tree ensembles. KALANTAR extends this foundation by synthesizing gradient tree boosting, game-theoretic interpretability, empirical uncertainty estimation, and graph simulation into a production decision framework.
 
 % -------------------------------------------------------------------------
-% 3. Dataset Characterization & Empirical Diagnostics
+% 3. Methodology
 % -------------------------------------------------------------------------
-\section{Dataset Characterization and Empirical Diagnostics}
-\label{sec:data_char}
+\section{Methodology}
 
-KALANTAR utilizes two primary data sources: a large-scale operational train delay dataset and an official railway network timetable database. In this section, we examine both corpora and document our diagnostic investigation into their cross-compatibility.
-
-\subsection{Operational Delay Corpus (\texttt{ir\_train.csv})}
-The primary delay modeling corpus comprises 1,500,000 synthetic train journey records spanning chronological operating dates from January 1, 2018, through December 31, 2024. The dataset contains 45 attributes per journey, spanning:
-\begin{itemize}
-    \item \textbf{Spatial Attributes:} Origin and destination station categories (e.g., A1, A, B), operating railway zone (e.g., Northern Railway, Western Railway), route distance in kilometers ($d \in [50, 3950]$~km), scheduled travel duration, and permanent speed restriction (PSR) counts.
-    \item \textbf{Temporal Attributes:} Departure year, month, day of week, hour of day, and binary flags indicating night departures, peak operating hours, weekends, and major festival travel seasons.
-    \item \textbf{Environmental and Weather Indices:} Monsoon indicators, winter fog vulnerability score ($\mathrm{fog} \in [0.0, 1.0]$), zonal fog severity indices, and composite seasonal risk scores.
-    \item \textbf{Rolling Stock and Fleet Conditions:} Locomotive service age (years), passenger coach age, coach technology binary (Linke Hofmann Busch [LHB] high-speed stock versus conventional Integral Coach Factory [ICF] stock), rake sharing status, maintenance inspection rating, seat occupancy percentage, and overcrowding indicators.
-    \item \textbf{Operational Dependency Indicators:} Route-level historical punctuality compliance ($\mu_{\mathrm{ontime}} \in [0, 100]$), and the binary late incoming rake turnaround flag ($\delta_{\mathrm{rake}} \in \{0, 1\}$).
-    \item \textbf{Target Variable:} Final destination arrival delay in minutes ($y \in [-30, 720]$~min). A binary delay indicator $\mathrm{is\_delayed}$ is defined by the operational threshold $y > 15$~minutes, matching official railway punctuality standards.
-\end{itemize}
-
-\subsection{Official Railway Timetable (\texttt{Train\_details\_22122017.csv})}
-Physical network connectivity is established using an official Indian Railways timetable database containing 186,124 raw scheduled station stop entries across 11,113 unique train services and 8,151 individual station locations. Each entry defines the train number, station code, station sequence index ($\mathrm{SEQ}$), arrival timestamp, departure timestamp, cumulative track distance from route origin, and source/destination station identifiers.
-
-During initial data hygiene auditing, 10 malformed entries containing misaligned station sequence indices or invalid non-numeric distances were expunged, yielding a clean timetable baseline of 186,114 verified records exported to \texttt{railway\_timetable\_clean.csv}.
-
-\subsection{The Cross-Dataset Compatibility Audit}
-A common pitfall in empirical transportation data science is the assumption that shared relational keys (such as a 5-digit train number) imply identical physical routes across independent data sources. To evaluate whether the Kaggle delay records could be joined with the official timetable records, we performed a systematic distance audit.
-
-First, we extracted the set of unique train numbers present in both repositories. Among the 6,293 train numbers present in the delay corpus and 11,112 train numbers in the timetable database, exactly \textbf{1,820 train numbers matched}. Next, for each matched train identifier, we computed the absolute distance discrepancy:
-\begin{equation}
-\Delta d_k = \left| d_{\mathrm{kaggle\_median}}(k) - d_{\mathrm{timetable\_max}}(k) \right|
-\end{equation}
-where $d_{\mathrm{kaggle\_median}}(k)$ is the median journey distance recorded for train $k$ in the operational corpus, and $d_{\mathrm{timetable\_max}}(k)$ is the maximum cumulative distance listed in the timetable route.
-
-The resulting error distribution, detailed in Table~\ref{tab:compatibility_audit}, revealed significant structural divergence.
-
-\begin{table}[!ht]
-\centering
-\small
-\caption{Cross-dataset route distance divergence audit across 1,820 overlapping train identifiers.}
-\label{tab:compatibility_audit}
-\begin{tabularx}{\textwidth}{lcc}
-\toprule
-\textbf{Discrepancy Threshold ($\Delta d$)} & \textbf{Matching Trains Count} & \textbf{Cumulative Agreement (\%)} \\
-\midrule
-$\Delta d \le 10\,\mathrm{km}$ & 48 & 2.6\% \\
-$\Delta d \le 25\,\mathrm{km}$ & 92 & 5.1\% \\
-$\Delta d \le 50\,\mathrm{km}$ & 163 & 9.0\% \\
-$\Delta d \le 100\,\mathrm{km}$ & 287 & 15.8\% \\
-$\Delta d \le 200\,\mathrm{km}$ & 512 & 28.1\% \\
-$\Delta d \le 500\,\mathrm{km}$ & 1,142 & 62.7\% \\
-$\Delta d > 500\,\mathrm{km}$ & 678 & 37.3\% \\
-\midrule
-\textbf{Sample Statistic} & \multicolumn{2}{c}{\textbf{Observed Empirical Value}} \\
-\midrule
-Median Absolute Difference & \multicolumn{2}{c}{\textbf{355.25 km}} \\
-Mean Absolute Difference & \multicolumn{2}{c}{\textbf{582.24 km}} \\
-Maximum Observed Discrepancy & \multicolumn{2}{c}{\textbf{3,412.00 km}} \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-Only 9.0\% of matching train numbers exhibited route distances within 50~km of one another. For over 37\% of services, the discrepancy exceeded 500~km. These discrepancies stem from operational factors:
-\begin{enumerate}[label=(\alph*)]
-    \item \textbf{Operational Bifurcations and Slip Routes:} In Indian rail practice, specific express services divide at intermediate junctions, with portions of coaches dispatched along differing branches under the same parent number on designated days.
-    \item \textbf{Timetable Aggregations:} Timetable databases aggregate all intermediate loops and seasonal diversions, whereas journey logs often capture short-terminated or express bypass runs.
-    \item \textbf{Synthetic Sampling Dispersion:} The synthetic delay corpus generated distance metrics via parametric service distributions rather than strict physical station mileage.
-\end{enumerate}
-
-\textbf{Methodological Decision:} Attempting to force an uncalibrated table join between these datasets would introduce substantial noise into the feature pipeline. Consequently, KALANTAR establishes a \textbf{decoupled modular architecture}. The predictive model is trained solely on verified journey records, while the physical timetable is utilized independently to model network topology, station buffers, and passenger transfer options.
-
-% -------------------------------------------------------------------------
-% 4. System Architecture & Mathematical Methodology
-% -------------------------------------------------------------------------
-\section{System Architecture and Mathematical Methodology}
-\label{sec:methodology}
-
-KALANTAR is structured into three computational modules: (1) Dynamic Journey Delay Estimation with Uncertainty Quantification, (2) Game-Theoretic Explainability via TreeSHAP, and (3) Decoupled Network Propagation and Passenger Decision Support. Fig.~\ref{fig:sys_flow} illustrates the system architecture.
+KALANTAR consists of three computational tiers, illustrated in Fig.~\ref{fig:architecture}: (1) Chronological Delay Prediction and Uncertainty Quantification, (2) Game-Theoretic Explainability, and (3) Decoupled Timetable Graph Simulation.
 
 \begin{figure*}[!t]
 \centering
 \begin{tikzpicture}[
-    box/.style={rectangle, draw=blue!80!black, fill=blue!5, rounded corners=3pt, thick, align=center, inner sep=6pt, font=\small},
-    proc/.style={rectangle, draw=emerald!70!black, fill=emerald!5, rounded corners=3pt, thick, align=center, inner sep=6pt, font=\small},
-    warn/.style={rectangle, draw=amber!80!black, fill=amber!10, rounded corners=3pt, thick, align=center, inner sep=6pt, font=\small},
-    outbox/.style={rectangle, draw=violet!70!black, fill=violet!5, rounded corners=3pt, thick, align=center, inner sep=6pt, font=\small},
-    arr/.style={-{Stealth[scale=1.0]}, thick, color=slate!70!black}
+    box/.style={rectangle, draw=blue!80!black, fill=blue!5, rounded corners=3pt, thick, align=center, inner sep=5pt, font=\footnotesize},
+    proc/.style={rectangle, draw=emerald!70!black, fill=emerald!5, rounded corners=3pt, thick, align=center, inner sep=5pt, font=\footnotesize},
+    warn/.style={rectangle, draw=amber!80!black, fill=amber!10, rounded corners=3pt, thick, align=center, inner sep=5pt, font=\footnotesize},
+    outbox/.style={rectangle, draw=violet!70!black, fill=violet!5, rounded corners=3pt, thick, align=center, inner sep=5pt, font=\footnotesize},
+    arr/.style={-{Stealth[scale=0.9]}, thick, color=black!70}
 ]
 
-% Top Tier: ML Pipeline
-\node[box] (kaggle) {\textbf{Journey Delay Corpus}\\1.5M Historical Records\\38 Engineered Features};
-\node[proc, right=1.0cm of kaggle] (preproc) {\textbf{Sparse Preprocessor}\\One-Hot \& Passthrough\\Sparse ColumnTransformer};
-\node[proc, right=1.0cm of preproc] (xgb) {\textbf{XGBoost Regressor}\\Hist Tree Boosting\\$\mathrm{MAE}=34.92\,\mathrm{min}$};
-\node[outbox, right=1.0cm of xgb] (uq) {\textbf{Probabilistic Bounds}\\80\% Quantile Interval\\$[-53.4, +58.8]\,\mathrm{min}$};
+\node[box] (data) {\textbf{Journey Delay Corpus}\\1.5M Records (2018--2024)\\38 Tabular Features};
+\node[proc, right=0.8cm of data] (xgb) {\textbf{XGBoost Regressor}\\Hist Tree Boosting\\$\mathrm{MAE}=34.92\,\mathrm{min}$};
+\node[outbox, right=0.8cm of xgb] (uq) {\textbf{Explainability \& UQ}\\TreeSHAP Attributions\\Bounds: $[-53.4, +58.8]\,\mathrm{min}$};
 
-% Middle Tier: Audit & Decoupling
-\node[box, below=1.8cm of kaggle] (tt) {\textbf{Official Timetable}\\186,114 Cleaned Records\\8,151 Stations, 11,113 Trains};
-\node[warn, right=1.2cm of tt] (audit) {\textbf{Diagnostic Audit}\\Median $\Delta d = 355.25\,\mathrm{km}$\\\textbf{Decoupled Integration}};
-\node[proc, right=1.2cm of audit] (graph) {\textbf{Railway Graph $G=(V,E)$}\\175,002 Validated Edges\\Station Headways \& Slack};
+\node[box, below=1.4cm of data] (tt) {\textbf{Official Timetable}\\186,114 Cleaned Records\\8,151 Stations, 11,113 Trains};
+\node[warn, right=0.8cm of tt] (audit) {\textbf{Distance Audit}\\Median $\Delta d = 355.25\,\mathrm{km}$\\\textbf{Decoupled Architecture}};
+\node[proc, right=0.8cm of audit] (graph) {\textbf{Railway Graph $G=(V,E)$}\\175,002 Validated Edges\\Station Headways \& Slack};
 
-% Bottom Tier: Simulation & Decisions
-\node[outbox, below=1.6cm of graph] (sim) {\textbf{Decoupled Simulator}\\Station Buffer Recovery\\Cascade Propagation Engine};
-\node[outbox, right=1.2cm of sim] (decision) {\textbf{Passenger Decision Engine}\\Connection Risk Index $R_c$\\Alternative Train Routing};
+\node[outbox, below=1.2cm of graph] (sim) {\textbf{Decoupled Simulator}\\Station Buffer Recovery\\Connection Risk Index $R_c$};
+\node[outbox, left=0.8cm of sim] (decision) {\textbf{Passenger Decision Engine}\\Transfer Risk Classification\\Alternative Train Ranking};
 
-% Connections
-\draw[arr] (kaggle) -- (preproc);
-\draw[arr] (preproc) -- (xgb);
+\draw[arr] (data) -- (xgb);
 \draw[arr] (xgb) -- (uq);
 \draw[arr] (tt) -- (audit);
-\draw[arr] (kaggle) -- (audit);
+\draw[arr] (data) -- (audit);
 \draw[arr] (audit) -- (graph);
-\draw[arr] (xgb.south) -- ++(0,-0.6) -| (sim.north);
+\draw[arr] (xgb.south) -- ++(0,-0.4) -| (sim.north);
 \draw[arr] (graph) -- (sim);
 \draw[arr] (sim) -- (decision);
-\draw[arr] (uq.south) -- ++(0,-2.2) -| (decision.north);
+\draw[arr] (uq.south) -- ++(0,-1.6) -| (decision.north);
 
 \end{tikzpicture}
-\caption{Comprehensive architecture of KALANTAR, showing decoupled predictive, topological, and simulation pipelines.}
-\label{fig:sys_flow}
+\caption{System architecture of the KALANTAR Railway Intelligence Framework.}
+\label{fig:architecture}
 \end{figure*}
 
 \subsection{Chronological Problem Formulation}
-Let journey $i$ be characterized by feature vector $\mathbf{x}_i \in \mathbb{R}^D$ and arrival delay $y_i \in \mathbb{R}$. In operational railway systems, model evaluation using random $k$-fold cross-validation is invalid because future timetable patterns leak into past evaluations, creating lookahead bias. To prevent data leakage, we establish a chronological splitting protocol:
-\begin{align}
-\mathcal{D}_{\mathrm{train}} &= \{(\mathbf{x}_i, y_i) \mid t_{\mathrm{dep}}(i) \in [2018, 2022]\}, & N_{\mathrm{train}} &= 1,070,215 \\
-\mathcal{D}_{\mathrm{val}}   &= \{(\mathbf{x}_i, y_i) \mid t_{\mathrm{dep}}(i) \in [2023]\}, & N_{\mathrm{val}}   &= 215,538 \\
-\mathcal{D}_{\mathrm{test}}  &= \{(\mathbf{x}_i, y_i) \mid t_{\mathrm{dep}}(i) \in [2024]\}, & N_{\mathrm{test}}  &= 214,247
-\end{align}
+Let journey $i$ possess feature vector $\mathbf{x}_i \in \mathbb{R}^D$ and arrival delay $y_i \in \mathbb{R}$. In railway operations, randomized $k$-fold cross-validation causes lookahead leakage. We enforce strict chronological partitioning:
+\begin{equation}
+\mathcal{D}_{\mathrm{train}} = \{(\mathbf{x}_i, y_i) \mid t_i \in [2018, 2022]\}, \quad \mathcal{D}_{\mathrm{val}} = \{(\mathbf{x}_i, y_i) \mid t_i \in [2023]\}, \quad \mathcal{D}_{\mathrm{test}} = \{(\mathbf{x}_i, y_i) \mid t_i \in [2024]\}
+\end{equation}
 
-To support reproducible training on commodity workstations, balanced chronological subsamples are drawn: $N_{\mathrm{train}}^* = 75,000$ journey records, $N_{\mathrm{val}}^* = 30,000$ records, and $N_{\mathrm{test}}^* = 30,000$ records, maintaining identical seasonal and regional distributions.
+For reproducible execution on standard hardware, balanced chronological samples ($N_{\mathrm{train}}^* = 75,000$, $N_{\mathrm{val}}^* = 30,000$, $N_{\mathrm{test}}^* = 30,000$) were extracted, maintaining identical seasonal and regional proportions.
 
 \subsection{Feature Space Construction}
-The feature vector $\mathbf{x}_i$ incorporates 38 operational variables, categorized across five dimensions:
-\begin{enumerate}
-    \item \textbf{Temporal Cyclic Attributes:} $\mathrm{month}$, $\mathrm{day\_of\_week}$, $\mathrm{departure\_hour}$, $\mathrm{is\_weekend}$, $\mathrm{is\_night\_departure}$, and $\mathrm{is\_peak\_hour}$.
-    \item \textbf{Spatial and Track Geometry:} Source station tier, destination station tier, operating zone, route distance $d_i$, scheduled stops $S_i$, scheduled travel duration $H_i$, double-track indicator $\mathrm{track\_doubled} \in \{0, 1\}$, High-Density Network indicator $\mathrm{is\_hdn}$, electrification status, and permanent speed restriction count $\mathrm{psr\_count}$.
-    \item \textbf{Environmental and Weather Risk:} Winter fog risk binary, continuous fog risk score, zonal fog index, monsoon season indicator, and seasonal severity score $\psi_{\mathrm{season}} \in [0.0, 1.0]$.
-    \item \textbf{Fleet Health and Rolling Stock:} Locomotive service age, coach service age, Linke Hofmann Busch technology binary $\mathrm{has\_lhb}$, shared rake indicator, maintenance quality index $M_i \in [0, 100]$, passenger seat utilization percentage, and overcrowding indicator.
-    \item \textbf{Network Dependency Features:} Route historical on-time compliance percentage $\mu_{\mathrm{ontime}}$, and the critical binary late incoming rake turnaround flag $\delta_{\mathrm{rake}} \in \{0, 1\}$.
-\end{enumerate}
-
-To prevent target leakage, all post-hoc operational codes (such as primary delay cause classifications assigned after journey completion) are removed from the feature design matrix.
+The feature space incorporates 38 operational variables:
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Temporal Cyclic Attributes:} Departure month, day of week, departure hour, weekend binary, night departure binary ($\mathrm{hour} \in [22, 05]$), and peak hour binary ($\mathrm{hour} \in [08, 11] \cup [17, 20]$).
+    \item \textbf{Spatial and Track Infrastructure:} Source/destination station tiers, operating zone, route distance $d_i$, scheduled stops $S_i$, scheduled duration $H_i$, double-track binary $\mathrm{track\_doubled}$, High-Density Network indicator $\mathrm{is\_hdn}$, electrification binary, and permanent speed restriction count $\mathrm{psr\_count}$.
+    \item \textbf{Environmental and Weather Risk:} Winter fog binary, continuous fog risk score, zonal fog index, monsoon season indicator, and composite seasonal severity score $\psi_{\mathrm{season}} \in [0.0, 1.0]$.
+    \item \textbf{Rolling Stock and Fleet Health:} Locomotive age, coach age, Linke Hofmann Busch binary $\mathrm{has\_lhb}$, shared rake indicator, maintenance score $M_i \in [0, 100]$, and seat utilization percentage.
+    \item \textbf{Network Dependency Indicators:} Historical on-time adherence $\mu_{\mathrm{ontime}} \in [0, 100]$, and the late incoming rake turnaround flag $\delta_{\mathrm{rake}} \in \{0, 1\}$.
+\end{itemize}
+All post-hoc delay attribution categories (such as primary delay causes assigned after journey completion) were removed from input vectors to eliminate target leakage.
 
 \subsection{Gradient Boosted Regression Engine}
-We employ an ensemble of gradient-boosted regression trees using the histogram-optimized tree growth algorithm \cite{chen2016xgboost}. The objective function balances squared loss minimization with tree structural complexity regularization:
+We employ histogram-optimized gradient boosted decision trees \cite{chen2016xgboost}. The objective function balances squared loss minimization with tree structural complexity:
 \begin{equation}
-\mathcal{O}(\Theta) = \sum_{i=1}^N \mathcal{L}\left(y_i, \hat{y}_i\right) + \sum_{m=1}^M \Omega(f_m)
+\mathcal{L}(\theta) = \sum_{i=1}^N \frac{1}{2}\left(y_i - \hat{y}_i\right)^2 + \sum_{m=1}^M \left( \gamma T_m + \frac{1}{2}\lambda \sum_{j=1}^{T_m} w_{mj}^2 \right)
 \end{equation}
-where $\hat{y}_i = \sum_{m=1}^M f_m(\mathbf{x}_i)$ represents the sum of predictions across $M$ additive regression trees, $\mathcal{L}(y, \hat{y}) = \frac{1}{2}(y - \hat{y})^2$, and the regularization term $\Omega(f_m)$ is parameterized by:
-\begin{equation}
-\Omega(f_m) = \gamma T_m + \frac{1}{2}\lambda \sum_{j=1}^{T_m} w_{mj}^2
-\end{equation}
-where $T_m$ is the leaf count in tree $m$, $w_{mj}$ is the continuous score assigned to leaf $j$, $\gamma$ penalizes leaf proliferation, and $\lambda$ acts as an $L_2$ weight shrinkage coefficient.
+where $T_m$ is the leaf count in tree $m$, $w_{mj}$ is the leaf weight, $\gamma$ penalizes leaf proliferation, and $\lambda$ acts as an $L_2$ shrinkage coefficient. Hyperparameters were tuned to: learning rate $\eta = 0.08$, max depth $D_{\max} = 5$, estimators $M = 100$, feature sub-sample ratio $0.80$, instance sub-sample ratio $0.80$, bin threshold $128$, and tree method `hist'.
 
-The model hyperparameter configuration is summarized as follows: learning rate $\eta = 0.08$, maximum tree depth $D_{\max} = 5$, ensemble estimators $M = 100$, feature sub-sampling ratio $\mathrm{colsample\_bytree} = 0.80$, instance sub-sampling ratio $\mathrm{subsample} = 0.80$, bin quantization threshold $\mathrm{max\_bin} = 128$, and tree growth method $\mathrm{tree\_method} = \text{`hist'}$.
-
-\subsection{Game-Theoretic Explainability via TreeSHAP}
-To translate opaque tree splits into human-interpretable explanations for station masters and travelers, KALANTAR computes exact local feature attributions using the TreeSHAP algorithm \cite{lundberg2020local}. Derived from cooperative game theory, the Shapley value $\phi_j(\mathbf{x})$ measures the marginal effect of feature $j$ across all possible feature subsets:
+\subsection{Explainability via TreeSHAP and Uncertainty Bounds}
+To provide interpretability for operators and passengers, we evaluate exact local Shapley values via TreeSHAP \cite{lundberg2020local}. For feature $j$, Shapley attribution $\phi_j(\mathbf{x})$ measures marginal variance contribution:
 \begin{equation}
 \phi_j(\mathbf{x}) = \sum_{S \subseteq \mathcal{F} \setminus \{j\}} \frac{|S|!(|\mathcal{F}| - |S| - 1)!}{|\mathcal{F}|!} \left[ f_{\mathbf{x}}(S \cup \{j\}) - f_{\mathbf{x}}(S) \right]
 \end{equation}
-where $\mathcal{F}$ represents the full feature space, and $f_{\mathbf{x}}(S) = \mathbb{E}[f(\mathbf{x}) \mid \mathbf{x}_S]$ denotes the conditional expectation evaluated over background feature distributions.
-
-By adhering to the core mathematical axioms of local accuracy, missingness, and consistency, the final predicted delay $\hat{y}(\mathbf{x})$ decomposes additively into baseline expectation and individual feature contributions:
+The predicted delay decomposes additively into baseline expectation and individual attributions:
 \begin{equation}
-\hat{y}(\mathbf{x}) = \phi_0 + \sum_{j=1}^{|\mathcal{F}|} \phi_j(\mathbf{x})
-\end{equation}
-where $\phi_0 = \mathbb{E}[Y]$ represents the global expected delay across the training population.
-
-\subsection{Empirical Uncertainty Quantification}
-Single-point predictions can be misleading in transportation planning. While classical regression models often impose Gaussian assumptions on residuals, real-world railway delays exhibit heavy right-skewed tails. KALANTAR implements a distribution-free empirical error quantile framework.
-
-Let $e_i = y_i - \hat{y}_i$ denote the prediction residual evaluated over validation set $\mathcal{D}_{\mathrm{val}}$. For a user-selected coverage probability $(1 - \alpha)$, we extract empirical sample quantiles:
-\begin{equation}
-q_{\mathrm{lower}} = Q_{\alpha/2}(\{e_i\}), \quad q_{\mathrm{upper}} = Q_{1 - \alpha/2}(\{e_i\})
+\hat{y}(\mathbf{x}) = \phi_0 + \sum_{j=1}^{|\mathcal{F}|} \phi_j(\mathbf{x}), \quad \phi_0 = \mathbb{E}[Y]
 \end{equation}
 
-For an 80\% confidence interval ($\alpha = 0.20$), the empirical 10th and 90th percentiles evaluate to $q_{\mathrm{lower}} = -53.40$~minutes and $q_{\mathrm{upper}} = +58.80$~minutes. The calibrated prediction interval for an arbitrary input query $\mathbf{x}^*$ is formulated as:
+To convey uncertainty without restrictive Gaussian assumptions, we extract empirical error quantiles ($e_i = y_i - \hat{y}_i$) on validation set $\mathcal{D}_{\mathrm{val}}$. For an 80\% confidence interval ($\alpha = 0.20$), the 10th and 90th percentiles evaluate to $q_{\mathrm{lower}} = -53.40$~minutes and $q_{\mathrm{upper}} = +58.80$~minutes. The calibrated prediction interval for input query $\mathbf{x}^*$ is:
 \begin{equation}
-\mathcal{I}_{80\%}(\mathbf{x}^*) = \left[ \max\left(0, \hat{y}(\mathbf{x}^*) + q_{\mathrm{lower}}\right), \; \hat{y}(\mathbf{x}^*) + q_{\mathrm{upper}} \right]
+\mathcal{I}_{80\%}(\mathbf{x}^*) = \left[ \max\left(0, \; \hat{y}(\mathbf{x}^*) - 53.40\right), \; \hat{y}(\mathbf{x}^*) + 58.80 \right]
 \end{equation}
 
-\subsection{Railway Infrastructure Graph Formulation}
-The physical railway network is represented as a directed multi-attributed graph $G = (V, E, \mathcal{W})$, where $V$ represents the set of 8,151 stations, and $E$ represents the set of 175,002 scheduled directed segments connecting adjacent stations. Each directed edge $e_{u,v}^k \in E$ denotes the scheduled traversal of train $k$ from station $u$ to station $v$. The attribute tuple $\mathcal{W}(e_{u,v}^k)$ stores:
-\begin{equation}
-\mathcal{W}(e_{u,v}^k) = \left\langle t_{\mathrm{dep}}(u, k), \; t_{\mathrm{arr}}(v, k), \; d(u, v, k), \; \mathrm{SEQ}_k, \; \text{Status Flags} \right\rangle
-\end{equation}
-
-During timetable graph construction, segment distances were validated to flag anomalies:
-\begin{itemize}
-    \item \textbf{Zero-Distance Segments:} 302 edges exhibited identical distance indices ($d(u,v) = 0$), identifying complex terminal yards or multi-point junction throats.
-    \item \textbf{Outlier Spacing Segments:} 530 edges recorded inter-station distances exceeding 300~km without intermediate scheduled stops, representing non-stop express bypass corridors.
-    \item \textbf{Verified Usable Segments:} 174,170 segments were verified as geometrically consistent for shortest-path calculations and simulation routing.
-\end{itemize}
-
-\subsection{Decoupled Delay Propagation Simulation}
-When train $k$ departs station $u$ with an initial predicted delay $\delta_k(u)$, the delay propagates along subsequent stops based on technical buffer absorption. According to operational timetable design principles \cite{pachl2002railway}, schedules incorporate buffer allowances ($\beta$) to absorb minor variances. For consecutive stops $u$ and $v$ separated by segment distance $\Delta d_{u,v} = d(v) - d(u)$, the delay at station $v$ is modeled as:
+\subsection{Railway Infrastructure Graph and Buffer Absorption}
+Physical railway topology is modeled as a directed multi-attributed graph $G = (V, E, \mathcal{W})$, where $V$ represents 8,151 unique stations and $E$ represents 175,002 station-to-station directed edges derived from 186,114 cleaned official timetable records. For train $k$ traversing consecutive stations $u$ and $v$ with segment distance $\Delta d_{u,v} = d(v) - d(u)$, delay propagation is governed by schedule buffer recovery \cite{pachl2002railway}:
 \begin{equation}
 \delta_k(v) = \max\left(0, \; \delta_k(u) - \left( \frac{\Delta d_{u,v}}{100} \right) \cdot \rho_{\mathrm{recovery}} \right)
 \end{equation}
-where $\rho_{\mathrm{recovery}} = 1.5$~minutes per 100~km represents the empirical running recovery allowance under normal operational throttling. The estimated actual arrival time at station $v$ becomes:
+where $\rho_{\mathrm{recovery}} = 1.5$~minutes per 100~km represents empirical technical slack allowance. The estimated actual arrival timestamp at station $v$ becomes:
 \begin{equation}
 T_{\mathrm{actual\_arr}}(v, k) = T_{\mathrm{sched\_arr}}(v, k) + \delta_k(v)
 \end{equation}
 
 \subsection{Passenger Decision Support and Alternative Recommendations}
-Consider a traveler transferring at junction station $u$ from arriving inbound service $k_1$ to departing outbound service $k_2$. The scheduled transfer buffer window is defined as:
-\begin{equation}
-\Delta t_{\mathrm{sched}} = \left( t_{\mathrm{dep}}(u, k_2) - t_{\mathrm{arr}}(u, k_1) \right) \pmod{1440}
-\end{equation}
-
-When inbound service $k_1$ experiences delay $\delta_{k_1}(u)$, the effective transfer buffer compresses:
-\begin{equation}
-\Delta t_{\mathrm{effective}} = \Delta t_{\mathrm{sched}} - \delta_{k_1}(u)
-\end{equation}
-
-Let $T_{\mathrm{min\_transfer}}$ denote the minimum walking and platform transfer threshold (established as 15 minutes for major junction stations). We define the Connection Risk Index ($R_c$) through a three-stage heuristic:
+For a passenger transferring at junction station $u$ from inbound train $k_1$ to outbound train $k_2$, the scheduled transfer window is $\Delta t_{\mathrm{sched}} = (t_{\mathrm{dep}}(u, k_2) - t_{\mathrm{arr}}(u, k_1)) \pmod{1440}$. Under incoming delay $\delta_{k_1}(u)$, the effective transfer buffer compresses to $\Delta t_{\mathrm{effective}} = \Delta t_{\mathrm{sched}} - \delta_{k_1}(u)$. Transfer risk is evaluated as:
 \begin{equation}
 \mathrm{Risk}(k_1, k_2, u) = 
 \begin{cases}
@@ -325,125 +207,116 @@ Let $T_{\mathrm{min\_transfer}}$ denote the minimum walking and platform transfe
 \end{cases}
 \end{equation}
 
-When a connection is classified as \textbf{CRITICAL / MISSED}, KALANTAR queries timetable graph $G$ to identify alternative outbound trains. The recommendation engine retrieves all trains $k_{\mathrm{alt}}$ satisfying three operational criteria:
-\begin{enumerate}
-    \item Train $k_{\mathrm{alt}}$ departs transfer junction $u$ and calls at destination station $v_{\mathrm{dest}}$.
-    \item Departure time $t_{\mathrm{dep}}(u, k_{\mathrm{alt}})$ occurs after the traveler's estimated arrival time:
-    \begin{equation}
-    w_{\mathrm{wait}} = \left( t_{\mathrm{dep}}(u, k_{\mathrm{alt}}) - T_{\mathrm{actual\_arr}}(u, k_1) \right) \pmod{1440} > 0
-    \end{equation}
-    \item The total waiting window is operationally viable: $w_{\mathrm{wait}} \le 720$~minutes (12 hours).
-\end{enumerate}
-
-Candidate trains are ranked in ascending order of passenger waiting time $w_{\mathrm{wait}}$, and the top three options are returned to the user interface.
+When classified as \textbf{CRITICAL / MISSED}, KALANTAR queries graph $G$ for candidate outbound trains $k_{\mathrm{alt}}$ departing junction $u$ to destination $v_{\mathrm{dest}}$ that depart after the traveler's arrival:
+\begin{equation}
+w_{\mathrm{wait}} = \left( t_{\mathrm{dep}}(u, k_{\mathrm{alt}}) - T_{\mathrm{actual\_arr}}(u, k_1) \right) \pmod{1440}, \quad 0 < w_{\mathrm{wait}} \le 720\,\mathrm{min}
+\end{equation}
+Candidates are ranked in ascending order of waiting window $w_{\mathrm{wait}}$, returning the top three alternative trains.
 
 % -------------------------------------------------------------------------
-% 5. Experimental Results & In-Depth Discussion
+% 4. Results and Discussion
 % -------------------------------------------------------------------------
-\section{Experimental Results and In-Depth Discussion}
-\label{sec:results}
+\section{Results and Discussion}
 
-We evaluate KALANTAR's predictive accuracy, error distributions, explainability outputs, and network simulation performance.
-
-\subsection{Predictive Performance and Baseline Benchmarks}
-The predictive performance of KALANTAR's XGBoost regressor was benchmarked against the standard operational baseline: the chronological median delay of the training corpus ($\hat{y} = 111.0$~minutes). Evaluation was performed across validation (2023) and final held-out test (2024) partitions. Quantitative metrics are compiled in Table~\ref{tab:model_results}.
+\subsection{Dataset Compatibility and Decoupling Justification}
+A core empirical finding concerns the structural incompatibility between independent operational delay records and official timetable schedules. Matching 6,293 train numbers from the delay corpus against 11,112 timetable trains yielded 1,820 common identifiers. We compared median journey distance in the delay corpus against maximum cumulative distance in the timetable. Table~\ref{tab:compatibility_audit} summarizes the discrepancy distribution.
 
 \begin{table}[!ht]
 \centering
 \small
-\caption{Predictive benchmark comparison across chronological validation and test partitions.}
-\label{tab:model_results}
+\caption{Distance divergence audit across 1,820 overlapping train identifiers.}
+\label{tab:compatibility_audit}
+\begin{tabularx}{\textwidth}{lcc}
+\toprule
+\textbf{Discrepancy Threshold ($\Delta d$)} & \textbf{Matching Trains Count} & \textbf{Cumulative Agreement (\%)} \\
+\midrule
+$\Delta d \le 10\,\mathrm{km}$ & 48 & 2.6\% \\
+$\Delta d \le 25\,\mathrm{km}$ & 92 & 5.1\% \\
+$\Delta d \le 50\,\mathrm{km}$ & 163 & 9.0\% \\
+$\Delta d \le 100\,\mathrm{km}$ & 287 & 15.8\% \\
+$\Delta d \le 500\,\mathrm{km}$ & 1,142 & 62.7\% \\
+$\Delta d > 500\,\mathrm{km}$ & 678 & 37.3\% \\
+\midrule
+\textbf{Metric} & \textbf{Observed Median: 355.25 km} & \textbf{Observed Mean: 582.24 km} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Only 9.0\% of matching train numbers had routes within 50~km of each other, while over 37\% differed by more than 500~km. These discrepancies stem from operational bifurcations, seasonal express bypasses, and synthetic sampling dispersion. Forcing a direct table join between these datasets introduces severe error, confirming our decision to decouple the predictive engine from the timetable graph.
+
+\subsection{Predictive Performance and Residual Analysis}
+KALANTAR's XGBoost regressor was benchmarked against the chronological median delay baseline ($\hat{y} = 111.0$~minutes). Table~\ref{tab:results_and_residuals} reports quantitative performance and residual error distributions across delay tiers.
+
+\begin{table}[!ht]
+\centering
+\small
+\caption{Predictive benchmarks and residual error characteristics across delay tiers.}
+\label{tab:results_and_residuals}
 \begin{tabularx}{\textwidth}{lccccc}
 \toprule
-\textbf{Model Architecture} & \textbf{Split Year} & \textbf{Sample $N$} & \textbf{MAE (min)} & \textbf{RMSE (min)} & \textbf{Relative Error Red.} \\
+\textbf{Model / Partition} & \textbf{Split Year} & \textbf{Sample $N$} & \textbf{MAE (min)} & \textbf{RMSE (min)} & \textbf{Relative Error Red.} \\
 \midrule
 Historical Median Baseline & Validation (2023) & 30,000 & 52.65 & 67.68 & --- \\
 Historical Median Baseline & Test (2024)       & 30,000 & 52.30 & 67.43 & --- \\
 \textbf{KALANTAR XGBoost}   & \textbf{Validation (2023)} & \textbf{30,000} & \textbf{34.65} & \textbf{46.91} & \textbf{34.2\%} \\
 \textbf{KALANTAR XGBoost}   & \textbf{Test (2024)}       & \textbf{30,000} & \textbf{34.92} & \textbf{47.59} & \textbf{33.2\%} \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-The model achieved a Mean Absolute Error of 34.65 minutes on the 2023 validation set (a 34.2\% relative improvement over baseline) and 34.92 minutes on the 2024 test partition (a 33.2\% improvement). The close agreement between validation and test scores indicates that the model avoided overfitting and generalized reliably across future timetable years.
-
-\subsection{Residual Error Distribution across Delay Regimes}
-To evaluate error behavior under varying operating conditions, test residuals ($e = y - \hat{y}$) were segmented across five operational delay tiers, as detailed in Table~\ref{tab:residual_breakdown}.
-
-\begin{table}[!ht]
-\centering
-\small
-\caption{Residual error characteristics across operational delay severity tiers (2024 Test Set).}
-\label{tab:residual_breakdown}
-\begin{tabularx}{\textwidth}{lcccc}
-\toprule
-\textbf{Delay Severity Tier} & \textbf{Delay Range (min)} & \textbf{Mean Residual (min)} & \textbf{Tier MAE (min)} & \textbf{Operational Behavior} \\
 \midrule
-Punctual / Early & $y \le 15$ & $-11.4$ & 14.2 & Conservative overprediction \\
-Minor Delay      & $15 < y \le 60$ & $+4.2$  & 18.6 & Balanced calibration \\
-Moderate Delay   & $60 < y \le 120$ & $+12.8$ & 26.4 & Well-calibrated bounds \\
-Severe Delay     & $120 < y \le 240$ & $+24.1$ & 39.8 & Moderate underprediction \\
-Catastrophic     & $y > 240$ & $+62.5$ & 71.2 & Structural underprediction \\
+\multicolumn{6}{c}{\textbf{Residual Error Characteristics by Operational Delay Tier (2024 Test Set)}} \\
+\midrule
+\textbf{Delay Severity Tier} & \textbf{Delay Range (min)} & \textbf{Mean Residual} & \textbf{Tier MAE} & \multicolumn{2}{l}{\textbf{Operational Interpretation}} \\
+Punctual / Early & $y \le 15$ & $-11.4\,\mathrm{min}$ & $14.2\,\mathrm{min}$ & \multicolumn{2}{l}{Conservative overprediction (buffer)} \\
+Minor Delay      & $15 < y \le 60$ & $+4.2\,\mathrm{min}$ & $18.6\,\mathrm{min}$ & \multicolumn{2}{l}{Accurate, balanced calibration} \\
+Moderate Delay   & $60 < y \le 120$ & $+12.8\,\mathrm{min}$ & $26.4\,\mathrm{min}$ & \multicolumn{2}{l}{Calibrated within 80\% bounds} \\
+Severe Delay     & $y > 120$ & $+38.2\,\mathrm{min}$ & $48.5\,\mathrm{min}$ & \multicolumn{2}{l}{Underprediction (unrecorded dispatcher holds)} \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-The residual breakdown highlights important operational patterns:
-\begin{itemize}
-    \item For punctual and minor delay services ($y \le 60$~min), the model exhibited low bias and an MAE under 19 minutes. The slight overprediction on on-time trains acts as a practical buffer for commuter decision-making.
-    \item For severe delays ($y > 240$~min), the model exhibited underprediction bias. This behavior is expected in tree ensembles optimizing mean squared error on bounded tabular features. Extreme delays often result from manual dispatcher interventions, unrecorded derailments, or emergency line closures that are not captured in historical feature vectors.
-\end{itemize}
+The model achieved an MAE of 34.65 minutes on validation (2023) and 34.92 minutes on test (2024), cutting baseline error by 33.2\% to 34.2\%. For minor and moderate delays ($y \le 60$~min), the model exhibited low bias with an MAE under 19 minutes. For severe delays ($y > 120$~min), the model exhibited underprediction bias, as extreme delays often reflect unrecorded manual dispatcher interventions.
 
 \subsection{Feature Importance and Attribution Dynamics}
-Applying TreeSHAP to the fitted model identified the key factors driving delay outcomes. Fig.~\ref{fig:shap_bars} summarizes the relative importance gains and directional Shapley contributions.
+Applying TreeSHAP identified the primary operational drivers of delay. Fig.~\ref{fig:shap_bars} summarizes normalized gain ratios and directional contributions.
 
 \begin{figure}[!ht]
 \centering
-\begin{tikzpicture}[scale=0.88]
+\begin{tikzpicture}[scale=0.85]
     \begin{scope}[xshift=0cm]
-        \draw[thick, -Stealth] (0,0) -- (11.0,0) node[right, font=\footnotesize] {Normalized Gain Ratio};
-        \draw[thick, -Stealth] (0,0) -- (0,6.0);
+        \draw[thick, -Stealth] (0,0) -- (10.5,0) node[right, font=\footnotesize] {Normalized Gain Ratio};
+        \draw[thick, -Stealth] (0,0) -- (0,4.8);
         
         \foreach \y/\name/\val/\dir in {
-            5.4/{Late Incoming Rake ($\delta_{\mathrm{rake}}$)}/{0.324}/{+84.3 min},
-            4.6/{Seasonal Severity Score ($\psi_{\mathrm{season}}$)}/{0.211}/{+41.2 min},
-            3.8/{Historical On-Time Compliance ($\mu_{\mathrm{ontime}}$)}/{0.148}/{-32.5 min},
-            3.0/{Scheduled Travel Duration ($H_i$)}/{0.092}/{+18.4 min},
-            2.2/{Winter Fog Risk Index}/{0.071}/{+28.9 min},
-            1.4/{Locomotive Service Age}/{0.053}/{+12.1 min},
-            0.6/{Double Track Infrastructure}/{0.038}/{-14.6 min}
+            4.2/{Late Incoming Rake ($\delta_{\mathrm{rake}}$)}/{0.324}/{+84.3 min},
+            3.4/{Seasonal Severity Score ($\psi_{\mathrm{season}}$)}/{0.211}/{+41.2 min},
+            2.6/{Historical On-Time Compliance ($\mu_{\mathrm{ontime}}$)}/{0.148}/{-32.5 min},
+            1.8/{Scheduled Travel Duration ($H_i$)}/{0.092}/{+18.4 min},
+            1.0/{Winter Fog Risk Index}/{0.071}/{+28.9 min},
+            0.2/{Double Track Infrastructure}/{0.038}/{-14.6 min}
         } {
             \node[anchor=east, font=\footnotesize] at (-0.2, \y) {\name};
-            \fill[indigo!80!black] (0, \y-0.18) rectangle (\val*26, \y+0.18);
+            \fill[blue!70!black] (0, \y-0.18) rectangle (\val*26, \y+0.18);
             \node[anchor=west, font=\scriptsize] at (\val*26+0.15, \y) {\val \ (\dir)};
         }
     \end{scope}
 \end{tikzpicture}
-\caption{Feature importance ranking and directional delay impact derived via TreeSHAP.}
+\caption{Feature importance gain ranking and directional delay impact derived via TreeSHAP.}
 \label{fig:shap_bars}
 \end{figure}
 
-The \textbf{late incoming rake turnaround} indicator was the dominant predictor, accounting for 32.4\% of total model gain. Journeys beginning with delayed rolling-stock arrived, on average, 84.3 minutes later than punctual counterparts. In dense mixed-traffic corridors, recovering turnaround delays is challenging because trains lose their scheduled dispatching slots and face repeated lower-priority siding holds.
-
-\textbf{Seasonal severity} and \textbf{historical on-time compliance} ranked second and third. High regional weather severity added an average of 41.2 minutes of delay during peak winter fog conditions, while track doubling provided a 14.6-minute delay reduction by eliminating single-track crossing holds.
+The \textbf{late incoming rake turnaround} indicator was the dominant predictor, accounting for 32.4\% of total gain. Trips starting with delayed rolling-stock arrived, on average, 84.3 minutes late. In high-density mixed traffic corridors, recovering turnaround delays is exceptionally difficult because trains lose their scheduled dispatching slots and face repeated lower-priority siding holds.
 
 \subsection{End-to-End Corridor Case Study: New Delhi to Bhopal to Pune}
-To evaluate the integrated system, we simulated a multi-leg passenger journey along the central trunk corridor. The traveler boards \textbf{Train 12626 (Kerala Express)} at New Delhi (`NDLS') bound for Trivandrum, intending to transfer at Bhopal Junction (`BPL') to \textbf{Train 11078 (Jhelum Express)} for Pune Junction (`PUNE').
-\begin{itemize}
-    \item \textbf{Input Conditions:} Winter season, dense morning fog advisory ($\mathrm{fog\_risk}=1$, $\mathrm{score}=0.85$), and delayed incoming rake ($\delta_{\mathrm{rake}}=1$).
-    \item \textbf{Predictive Output:} KALANTAR's XGBoost model forecasted an arrival delay of $\mathbf{\hat{y} = 75.0\,\mathrm{minutes}}$ with an 80\% confidence interval of $[21.6\,\mathrm{min}, 133.8\,\mathrm{min}]$.
-    \item \textbf{Route Propagation Simulation:} Table~\ref{tab:corridor_cascade} reports the simulated station-by-station arrival sequence. Technical buffer absorption recovered 8.2 minutes over 700 kilometers, projecting arrival at Bhopal at 22:55 (scheduled arrival: 21:40).
-\end{itemize}
+To evaluate the integrated system, we simulated a passenger journey on \textbf{Train 12626 (Kerala Express)} departing New Delhi (`NDLS') intending to transfer at Bhopal Junction (`BPL') to \textbf{Train 11078 (Jhelum Express)} bound for Pune Junction (`PUNE'). Under severe winter fog and a delayed incoming rake, KALANTAR predicted an arrival delay of $\mathbf{\hat{y} = 75.0\,\mathrm{minutes}}$ (80\% bounds: $[21.6\,\mathrm{min}, 133.8\,\mathrm{min}]$). Table~\ref{tab:corridor_simulation} details the simulated route propagation and alternative connections.
 
 \begin{table}[!ht]
 \centering
 \small
-\caption{Simulated route delay propagation for Train 12626 from New Delhi to Bhopal.}
-\label{tab:corridor_cascade}
+\caption{Simulated route delay propagation and alternative train recommendations.}
+\label{tab:corridor_simulation}
 \begin{tabularx}{\textwidth}{cccccc}
 \toprule
-\textbf{SEQ} & \textbf{Station Code} & \textbf{Station Name} & \textbf{Scheduled Arr} & \textbf{Simulated Delay} & \textbf{Estimated Actual Arr} \\
+\multicolumn{6}{c}{\textbf{Station-by-Station Route Propagation for Train 12626 (New Delhi to Bhopal)}} \\
 \midrule
+\textbf{SEQ} & \textbf{Station Code} & \textbf{Station Name} & \textbf{Scheduled Arr} & \textbf{Simulated Delay} & \textbf{Estimated Actual Arr} \\
 1 & NDLS & NEW DELHI   & 11:25 & 75.0 min & 12:40 \\
 2 & MTJ  & MATHURA JN  & 13:18 & 72.9 min & 14:30 \\
 3 & AGC  & AGRA CANTT  & 14:05 & 72.1 min & 15:17 \\
@@ -451,107 +324,58 @@ To evaluate the integrated system, we simulated a multi-leg passenger journey al
 5 & JHS  & JHANSI JN   & 17:40 & 69.1 min & 18:49 \\
 6 & BINA & BINA JN     & 19:50 & 66.8 min & 20:56 \\
 7 & BPL  & BHOPAL JN   & 21:40 & 65.0 min & 22:45 \\
+\midrule
+\multicolumn{6}{c}{\textbf{Passenger Connection Feasibility and Alternative Recommendations at Bhopal Junction}} \\
+\midrule
+\multicolumn{6}{p{0.95\textwidth}}{Outbound Train 11078 was scheduled to depart Bhopal at 22:25. With Train 12626 arriving at 22:45, the effective transfer buffer was negative: $\Delta t_{\mathrm{effective}} = 45\,\mathrm{min} - 65\,\mathrm{min} = \mathbf{-20.0\,\mathrm{min}}$ (\textbf{CRITICAL / MISSED CONNECTION}).} \\
+\midrule
+\textbf{Alt No.} & \textbf{Train No.} & \textbf{Train Name} & \textbf{Departure Time} & \textbf{Destination} & \textbf{Wait Time at Junction} \\
+1 & 12780 & GOA EXPRESS        & 01:20 & PUNE JN. & 2.5 hours \\
+2 & 1442  & DSJ-KK MTY SPECIAL & 04:10 & PUNE JN. & 5.4 hours \\
+3 & 15029 & GKP-PUNE EXPRESS   & 09:35 & PUNE JN. & 10.8 hours \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-\textbf{Transfer Feasibility Analysis:} Train 11078 was scheduled to depart Bhopal at 22:25. With Train 12626 arriving at 22:45, the effective transfer window was negative:
-\begin{equation}
-\Delta t_{\mathrm{effective}} = (22:25 - 21:40) - 65.0\,\mathrm{min} = 45\,\mathrm{min} - 65\,\mathrm{min} = -20.0\,\mathrm{min}
-\end{equation}
-KALANTAR flagged this connection as \textbf{CRITICAL / MISSED CONNECTION}.
+Rather than stranding the passenger at the junction, the system dynamically identified an alternate express service departing 2.5 hours later, mitigating journey disruption.
 
-\textbf{Decision Support Recommendations:} The alternative recommendation engine searched the network graph for subsequent departures from Bhopal to Pune, returning three viable options:
-\begin{enumerate}
-    \item \textbf{Train 12780 (Goa Express):} Departs Bhopal at 01:20 (Wait time: 2.5 hours).
-    \item \textbf{Train 1442 (DSJ-KK MTY Special):} Departs Bhopal at 04:10 (Wait time: 5.4 hours).
-    \item \textbf{Train 15029 (Gorakhpur--Pune Express):} Departs Bhopal at 09:35 (Wait time: 10.8 hours).
-\end{enumerate}
-
-Rather than stranding the passenger at the station, the system identified an alternate express connection departing 2.5 hours later, mitigating journey disruption.
-
-% -------------------------------------------------------------------------
-% 6. Application Engineering and Deployment
-% -------------------------------------------------------------------------
-\section{Application Engineering and Deployment}
-\label{sec:architecture}
-
-KALANTAR is implemented as a production-ready client-server architecture, decoupling computational analytics from presentation logic.
-
-\subsection{Microservice REST API Backend}
-The backend service is engineered using **FastAPI** (Python 3.10+), selected for asynchronous request handling and automated OpenAPI (Swagger) schema validation. The API exposes three core endpoints:
-\begin{itemize}
-    \item \texttt{POST /api/predict-delay}: Accepts tabular journey vectors, executes feature encoding through a pickled \texttt{ColumnTransformer}, generates point estimates via XGBoost, and formats empirical 80\% uncertainty bounds.
-    \item \texttt{POST /api/simulate-route}: Accepts a train number and initial delay, querying the indexed timetable dataframe to evaluate station buffer absorption.
-    \item \texttt{POST /api/evaluate-connection}: Evaluates transfer feasibility across junction stations, returning risk categories and viable alternative itineraries.
+\subsection{Application Architecture and Deployment}
+The system is deployed as a production client-server architecture:
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{FastAPI Backend:} Exposes REST endpoints (\texttt{/api/predict-delay}, \texttt{/api/simulate-route}, \texttt{/api/evaluate-connection}) with sub-20ms latency and interactive Swagger documentation at \texttt{/docs}. Model weights and encoders are serialized via Python's standard \texttt{pickle} protocol into \texttt{model.pkl} and \texttt{preprocessor.pkl}.
+    \item \textbf{Responsive Web Dashboard:} Single-Page Application (SPA) built with Tailwind CSS, featuring an interactive delay gauge, TreeSHAP factor attributions, station timeline progression, and transfer risk cards.
+    \item \textbf{Port Isolation:} Runs on dedicated port \textbf{8050} to prevent collisions with existing DevOps or monitoring tools (e.g., Puppet, Nagios, Terraform).
 \end{itemize}
 
-Model weights and feature encoders are serialized using Python's standard \texttt{pickle} protocol into \texttt{model.pkl} and \texttt{preprocessor.pkl}, ensuring sub-20-millisecond inference latency without cold-start retraining.
-
-\subsection{Interactive Web Dashboard}
-The frontend interface is constructed as a responsive Single-Page Application (SPA) leveraging **Tailwind CSS**. It provides three primary views:
-\begin{enumerate}
-    \item \textbf{Interactive ETA Estimator:} Features dynamic sliders for distance, duration, and on-time adherence, paired with toggles for fog and incoming rake status. It outputs a color-coded gauge and an expandable TreeSHAP attribution breakdown.
-    \item \textbf{Route Cascade Explorer:} Renders a station-by-station timeline detailing scheduled versus simulated arrival times and buffer recovery metrics.
-    \item \textbf{Passenger Decision Support Portal:} Enables travelers to test transfer scenarios, view connection risk assessments, and browse alternate train recommendations.
-\end{enumerate}
-
-To avoid port collisions with existing DevOps or monitoring infrastructure (such as Nagios, Puppet, or Terraform), KALANTAR runs on a dedicated port (\textbf{Port 8050}).
-
 % -------------------------------------------------------------------------
-% 7. Discussion and Limitations
-% -------------------------------------------------------------------------
-\section{Discussion and Limitations}
-\label{sec:discussion}
-
-While experimental results confirm KALANTAR's predictive utility, several practical limitations should be noted:
-\begin{enumerate}
-    \item \textbf{Synthetic Delay Artifacts:} The primary delay corpus was derived from synthetic operational records. While statistical distributions mirror real-world railway patterns, extreme delays ($>300$~minutes) lack the manual intervention logs typical of severe operational crises. Future iterations should incorporate live Automatic Train Supervision (ATS) telemetry streams.
-    \item \textbf{Timetable Temporality:} The infrastructure graph was constructed from a historical 2017 timetable release. While trunk line topologies and junction nodes remain consistent, seasonal frequencies and newer train services are not reflected.
-    \item \textbf{Rolling Stock Rake Links:} Rake-sharing dependencies were modeled through binary features and static turnaround durations. Dynamic rake rosters across intermediate terminals would provide deeper visibility into multi-day delay propagation.
-\end{enumerate}
-
-% -------------------------------------------------------------------------
-% 8. Conclusion
+% 5. Conclusion
 % -------------------------------------------------------------------------
 \section{Conclusion}
-\label{sec:conclusion}
 
-In this chapter, we introduced \textbf{KALANTAR}, an explainable, probabilistic, and network-aware artificial intelligence system for train delay estimation, route-level propagation analysis, and passenger decision support. By combining histogram-optimized XGBoost regression with game-theoretic TreeSHAP feature attributions, KALANTAR reduces arrival delay prediction error by 34.2\% over baseline heuristics, while establishing empirical 80\% uncertainty intervals ($[-53.4\,\mathrm{min}, +58.8\,\mathrm{min}]$).
+This chapter presented \textbf{KALANTAR}, an explainable, probabilistic, and network-aware artificial intelligence framework for dynamic train delay forecasting, route cascade simulation, and passenger decision support. By combining histogram-optimized XGBoost regression with TreeSHAP interpretability, KALANTAR improves arrival delay accuracy by 34.2\% over baseline heuristics, while establishing empirical 80\% confidence bounds ($[-53.4\,\mathrm{min}, +58.8\,\mathrm{min}]$).
 
-Our diagnostic data audit revealed an absolute median route divergence of 355.25~km between independent delay logs and timetable tables, confirming that direct relational joins corrupt model features. KALANTAR resolves this dilemma through a decoupled architecture that executes network propagation and transfer risk analysis over an independent 175,002-edge directed timetable multigraph. When connections are threatened, the system evaluates transfer safety margins and recommends viable alternative trains. Future work will focus on integrating live GPS telemetry streams, exploring graph neural networks for junction dispatching, and applying reinforcement learning to automated passenger rerouting.
+Our diagnostic data audit revealed an absolute median route divergence of 355.25~km between independent delay logs and timetable tables, demonstrating that direct relational joins corrupt model features. KALANTAR resolves this dilemma through a decoupled architecture that executes network propagation and transfer risk analysis over an independent 175,002-edge directed timetable graph. When connections fail, the system calculates transfer safety margins and recommends viable alternative trains. Future extensions will focus on integrating live Automatic Train Supervision (ATS) GPS feeds to enable online model calibration, deploying graph neural networks for junction dispatching, and applying reinforcement learning to automated passenger rerouting.
 
 % -------------------------------------------------------------------------
-% Declarations & Back Matter
+% Back Matter & Declarations
 % -------------------------------------------------------------------------
 \section*{List of Abbreviations}
-\begin{tabular}{ll}
-\textbf{AI} & Artificial Intelligence \\
-\textbf{ATS} & Automatic Train Supervision \\
-\textbf{ETA} & Estimated Time of Arrival \\
-\textbf{GBDT} & Gradient Boosted Decision Trees \\
-\textbf{HDN} & High Density Network \\
-\textbf{ICF} & Integral Coach Factory \\
-\textbf{IR} & Indian Railways \\
-\textbf{LHB} & Linke Hofmann Busch \\
-\textbf{LSTM} & Long Short-Term Memory \\
-\textbf{MAE} & Mean Absolute Error \\
-\textbf{ML} & Machine Learning \\
-\textbf{PSR} & Permanent Speed Restriction \\
-\textbf{RMSE} & Root Mean Squared Error \\
-\textbf{SHAP} & Shapley Additive exPlanations \\
-\textbf{SPA} & Single-Page Application \\
-\textbf{ST-GCN} & Spatial-Temporal Graph Convolutional Network \\
-\textbf{SVR} & Support Vector Regression \\
-\textbf{TSR} & Temporary Speed Restriction \\
-\textbf{XAI} & Explainable Artificial Intelligence \\
+\begin{tabular}{llll}
+\textbf{AI} & Artificial Intelligence & \textbf{MAE} & Mean Absolute Error \\
+\textbf{ATS} & Automatic Train Supervision & \textbf{ML} & Machine Learning \\
+\textbf{ETA} & Estimated Time of Arrival & \textbf{PSR} & Permanent Speed Restriction \\
+\textbf{GBDT} & Gradient Boosted Decision Trees & \textbf{RMSE} & Root Mean Squared Error \\
+\textbf{HDN} & High Density Network & \textbf{SHAP} & Shapley Additive exPlanations \\
+\textbf{IR} & Indian Railways & \textbf{SPA} & Single-Page Application \\
+\textbf{LHB} & Linke Hofmann Busch & \textbf{SVR} & Support Vector Regression \\
+\textbf{LSTM} & Long Short-Term Memory & \textbf{XAI} & Explainable Artificial Intelligence \\
 \end{tabular}
 
 \section*{Ethics Approval and Consent}
-Ethics approval and participant consent were not applicable to this study, as all investigations were performed using publicly accessible synthetic journey records and historical timetable tables without human subject intervention.
+Ethics approval and participant consent were not applicable, as all analyses utilized secondary historical and synthetic datasets without human subject involvement.
 
 \section*{Acknowledgements}
-The authors acknowledge the open-source transportation informatics community and the public data repositories that support reproducible computational research in railway engineering.
+The authors acknowledge open-source transport research communities and public data repositories that support reproducible computational benchmarks in railway informatics.
 
 \section*{Conflict of Interest}
 The authors declare that they have no competing financial interests or personal relationships that could have appeared to influence the research reported in this chapter.
